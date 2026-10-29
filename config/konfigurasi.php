@@ -1,6 +1,9 @@
 <?php
 
-define('BASE_URL', '/P3L');
+// Otomatis mengambil nama folder utama proyek (misal: "Pedulifund" atau "P3L")
+$namaFolder = basename(dirname(__DIR__));
+define('BASE_URL', '/' . $namaFolder);
+
 define('APP_NAME', 'PeduliFund');
 define('ID_FUNDRAISER_SEMENTARA', 1);
 define('UKURAN_MAKS_UPLOAD', 2097152);
