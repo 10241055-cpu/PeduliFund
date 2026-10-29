@@ -1,0 +1,10 @@
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+uploads/dokumen_campaign/*
+!uploads/dokumen_campaign/.gitkeep
+!uploads/dokumen_campaign/.htaccess
+uploads/gambar_campaign/*
+!uploads/gambar_campaign/.gitkeep
