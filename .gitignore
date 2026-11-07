@@ -3,6 +3,7 @@
 Thumbs.db
 .DS_Store
 .claude
+AGENTS.md
 uploads/dokumen_campaign/*
 !uploads/dokumen_campaign/.gitkeep
 !uploads/dokumen_campaign/.htaccess
