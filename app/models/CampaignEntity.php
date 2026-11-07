@@ -54,7 +54,8 @@ class CampaignEntity
         $cari = trim($cari);
         if ($cari !== '') {
             $sql .= ' AND judul LIKE :cari';
-            $parameter[':cari'] = '%' . $cari . '%';
+            // % dan _ punya makna khusus di LIKE; jadikan literal agar hasil cari presisi
+            $parameter[':cari'] = '%' . addcslashes($cari, '%_\\') . '%';
         }
 
         $statusFilter = trim($statusFilter);
@@ -99,5 +100,32 @@ class CampaignEntity
         ]);
 
         return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
+     * Mengambil satu campaign milik fundraiser tertentu; null jika tidak ada
+     */
+    public function ambilByIdCampaign(int $idCampaign, int $idFundraiser): ?array
+    {
+        $pernyataan = $this->pdo->prepare(
+            'SELECT * FROM campaign WHERE id_campaign = :id_campaign AND id_fundraiser = :id_fundraiser'
+        );
+        $pernyataan->execute([':id_campaign' => $idCampaign, ':id_fundraiser' => $idFundraiser]);
+        $campaign = $pernyataan->fetch();
+
+        return $campaign !== false ? $campaign : null;
+    }
+
+    /**
+     * Menghapus satu campaign milik fundraiser tertentu; true jika ada baris terhapus
+     */
+    public function hapusCampaign(int $idCampaign, int $idFundraiser): bool
+    {
+        $pernyataan = $this->pdo->prepare(
+            'DELETE FROM campaign WHERE id_campaign = :id_campaign AND id_fundraiser = :id_fundraiser'
+        );
+        $pernyataan->execute([':id_campaign' => $idCampaign, ':id_fundraiser' => $idFundraiser]);
+
+        return $pernyataan->rowCount() > 0;
     }
 }

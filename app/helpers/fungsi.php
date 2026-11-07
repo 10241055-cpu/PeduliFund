@@ -58,19 +58,20 @@ function hitungPersen($terkumpul, $target): int
 }
 
 /**
- * Kembalikan kelas badge Bootstrap sesuai status campaign
- * Pending => 'text-bg-warning', Aktif => 'text-bg-success', Ditolak => 'text-bg-danger', Selesai => 'text-bg-primary'
+ * Kembalikan kelas badge sesuai status campaign (design.md Bagian 2.3)
+ * Pending => pil krem + titik oranye, Aktif => kapsul putih + pil sage,
+ * Ditolak => pil blush + teks rose, Selesai => badge sage solid
  */
 function kelasBadgeStatus($status): string
 {
     $kelas = [
-        'Pending' => 'text-bg-warning',
-        'Aktif'   => 'text-bg-success',
-        'Ditolak' => 'text-bg-danger',
-        'Selesai' => 'text-bg-primary',
+        'Pending' => 'pf-badge--pending',
+        'Aktif'   => 'pf-badge--aktif',
+        'Ditolak' => 'pf-badge--ditolak',
+        'Selesai' => 'pf-badge--selesai',
     ];
 
-    return $kelas[$status] ?? 'text-bg-secondary';
+    return $kelas[$status] ?? 'pf-badge--netral';
 }
 
 /**
@@ -123,4 +124,27 @@ function ambilPesan(): ?array
 function idPenggunaAktif(): int
 {
     return ID_FUNDRAISER_SEMENTARA;
+}
+
+/**
+ * Token anti-CSRF untuk semua form POST (dibuat sekali per sesi)
+ */
+function tokenCsrf(): string
+{
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+    }
+
+    return $_SESSION['csrf_token'];
+}
+
+/**
+ * Tolak POST tanpa/menyandong token anti-CSRF yang tidak cocok
+ */
+function verifikasiCsrf(): void
+{
+    if (!hash_equals(tokenCsrf(), (string) ($_POST['csrf_token'] ?? ''))) {
+        setPesan('danger', 'Sesi tidak valid, silakan coba kembali.');
+        alihkan('dashboard_fundraiser.php');
+    }
 }

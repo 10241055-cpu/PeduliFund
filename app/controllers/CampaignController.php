@@ -18,7 +18,6 @@ class CampaignController
     {
         $idFundraiser = idPenggunaAktif();
 
-        // Baca parameter cari dan status
         $cari = trim((string) ($_GET['cari'] ?? ''));
         $filterStatus = trim((string) ($_GET['status'] ?? ''));
 
@@ -27,7 +26,6 @@ class CampaignController
             $filterStatus = '';
         }
 
-        // Ambil data ringkasan dan daftar campaign
         $ringkasan = $this->campaignEntity->ambilRingkasanFundraiser($idFundraiser);
         $daftarCampaign = $this->campaignEntity->ambilDaftarByFundraiser($idFundraiser, $cari, $filterStatus);
 
@@ -39,7 +37,6 @@ class CampaignController
      */
     public function tampilkanFormCampaign(): void
     {
-        // Ambil errors dan old dari session, lalu hapus dari session
         $errors = $_SESSION['errors'] ?? [];
         $old = $_SESSION['old'] ?? [];
         unset($_SESSION['errors'], $_SESSION['old']);
@@ -54,12 +51,12 @@ class CampaignController
      */
     public function kirimCampaign(): void
     {
-        // Hanya terima request bertipe POST, selain itu alihkan ke dashboard
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             alihkan('dashboard_fundraiser.php');
         }
 
-        // Ambil dan trim input
+        verifikasiCsrf();
+
         $judul = trim((string) ($_POST['judul'] ?? ''));
         $jenis = trim((string) ($_POST['jenis'] ?? ''));
         $deskripsi = trim((string) ($_POST['deskripsi'] ?? ''));
@@ -120,7 +117,6 @@ class CampaignController
 
         $adaGambar = isset($berkasGambar) && (int) ($berkasGambar['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
 
-        // Jika ada kesalahan validasi awal, kembalikan ke form
         if (!empty($errors)) {
             $_SESSION['errors'] = $errors;
             $_SESSION['old'] = $old;
@@ -154,7 +150,6 @@ class CampaignController
             );
 
             if (!$hasilGambar['berhasil']) {
-                // Hapus dokumen yang sudah sempat diunggah
                 UnggahBerkas::hapus(DIR_UPLOAD_DOKUMEN, $namaDokumen);
 
                 $_SESSION['errors'] = ['Gambar campaign: ' . $hasilGambar['pesan']];
@@ -165,7 +160,6 @@ class CampaignController
             $namaGambar = $hasilGambar['nama_file'];
         }
 
-        // Simpan campaign ke database
         try {
             $this->campaignEntity->simpanCampaign([
                 'id_fundraiser'    => idPenggunaAktif(),
@@ -181,7 +175,6 @@ class CampaignController
             setPesan('success', 'Campaign berhasil dikirim dan menunggu verifikasi admin.');
             alihkan('dashboard_fundraiser.php');
         } catch (PDOException $e) {
-            // Jika simpan ke database gagal, hapus berkas yang sudah sempat terunggah
             UnggahBerkas::hapus(DIR_UPLOAD_DOKUMEN, $namaDokumen);
             if ($namaGambar !== null) {
                 UnggahBerkas::hapus(DIR_UPLOAD_GAMBAR, $namaGambar);
@@ -191,5 +184,43 @@ class CampaignController
             $_SESSION['old'] = $old;
             alihkan('buat_campaign.php');
         }
+    }
+
+    /**
+     * Menghapus campaign milik fundraiser aktif beserta berkas terunggahnya (POST)
+     */
+    public function hapusCampaign(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            alihkan('dashboard_fundraiser.php');
+        }
+
+        verifikasiCsrf();
+
+        $idCampaign = (int) ($_POST['id_campaign'] ?? 0);
+        $campaign = $idCampaign > 0
+            ? $this->campaignEntity->ambilByIdCampaign($idCampaign, idPenggunaAktif())
+            : null;
+
+        if ($campaign === null) {
+            setPesan('danger', 'Campaign tidak ditemukan.');
+            alihkan('dashboard_fundraiser.php');
+        }
+
+        try {
+            $this->campaignEntity->hapusCampaign($idCampaign, idPenggunaAktif());
+
+            // Berkas ikut dihapus agar folder upload tidak menumpuk sampah
+            UnggahBerkas::hapus(DIR_UPLOAD_DOKUMEN, (string) $campaign['dokumen_campaign']);
+            if (!empty($campaign['gambar_campaign'])) {
+                UnggahBerkas::hapus(DIR_UPLOAD_GAMBAR, (string) $campaign['gambar_campaign']);
+            }
+
+            setPesan('success', 'Campaign berhasil dihapus.');
+        } catch (PDOException $e) {
+            setPesan('danger', 'Campaign gagal dihapus. Silakan coba kembali.');
+        }
+
+        alihkan('dashboard_fundraiser.php');
     }
 }
