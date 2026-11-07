@@ -21,7 +21,7 @@ Aplikasi platform crowdfunding dan donasi berbasis campaign untuk mendukung peng
 ## Persiapan
 1. Clone repository.
 2. Siapkan web server dan database lokal.
-3. Buat database sesuai skrip di folder database.
+3. Buat database sesuai skrip di folder database (impor `schema.sql`, lalu `sample_data.sql`).
 4. Sesuaikan konfigurasi database lokal.
 
 ## Catatan

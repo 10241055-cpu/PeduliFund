@@ -2,7 +2,7 @@
 .idea/
 Thumbs.db
 .DS_Store
-
+.claude
 uploads/dokumen_campaign/*
 !uploads/dokumen_campaign/.gitkeep
 !uploads/dokumen_campaign/.htaccess
