@@ -94,11 +94,16 @@ require __DIR__ . '/layout/header.php';
                                     <td class="pf-angka"><?= e(formatTanggal($campaign['deadline'])) ?></td>
                                     <td><span class="pf-badge <?= e(kelasBadgeStatus($campaign['status_campaign'])) ?>"><span class="pf-badge-pil"><?= e($campaign['status_campaign']) ?></span></span></td>
                                     <td>
-                                        <form method="post" action="<?= e(BASE_URL) ?>/hapus_campaign.php" onsubmit="return confirm('Hapus campaign ini?');" class="m-0">
-                                            <input type="hidden" name="csrf_token" value="<?= e(tokenCsrf()) ?>">
-                                            <input type="hidden" name="id_campaign" value="<?= e((string) $campaign['id_campaign']) ?>">
-                                            <button class="btn-pf-hapus" type="submit">Hapus</button>
-                                        </form>
+                                        <div class="d-flex gap-1 align-items-center">
+                                            <?php if ($campaign['status_campaign'] === 'Aktif'): ?>
+                                                <a class="btn-pf-outline py-1 px-3" style="font-size: 11px;" href="<?= e(BASE_URL) ?>/donasi.php?id=<?= e((string) $campaign['id_campaign']) ?>">Donasi</a>
+                                            <?php endif; ?>
+                                            <form method="post" action="<?= e(BASE_URL) ?>/hapus_campaign.php" onsubmit="return confirm('Hapus campaign ini?');" class="m-0">
+                                                <input type="hidden" name="csrf_token" value="<?= e(tokenCsrf()) ?>">
+                                                <input type="hidden" name="id_campaign" value="<?= e((string) $campaign['id_campaign']) ?>">
+                                                <button class="btn-pf-hapus" type="submit">Hapus</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

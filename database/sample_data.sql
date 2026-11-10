@@ -3,9 +3,11 @@
 
 USE pedulifund;
 
--- Data contoh pengguna: id_user 1, role Fundraiser
+-- Data contoh pengguna: id_user 1 (Fundraiser) dan id_user 2 (Donatur)
 INSERT INTO pengguna (id_user, email, password, role)
-VALUES (1, 'fundraiser@pedulifund.test', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Fundraiser')
+VALUES 
+(1, 'fundraiser@pedulifund.test', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Fundraiser'),
+(2, 'donatur@pedulifund.test', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Donatur')
 ON DUPLICATE KEY UPDATE
     email = VALUES(email),
     password = VALUES(password),
@@ -28,3 +30,17 @@ ON DUPLICATE KEY UPDATE
     status_campaign = VALUES(status_campaign),
     deskripsi = VALUES(deskripsi),
     gambar_campaign = VALUES(gambar_campaign);
+
+-- Data contoh transaksi donasi (ACT-003 / Melakukan Donasi)
+INSERT INTO donasi (id_donasi, id_campaign, id_donatur, nominal, metode_pembayaran, status_pembayaran, tanggal_pembayaran)
+VALUES
+(1, 1, 2, 5000000.00, 'Transfer Bank', 'Berhasil', '2026-10-25 10:15:00'),
+(2, 1, 2, 2500000.00, 'QRIS', 'Berhasil', '2026-10-26 14:30:00'),
+(3, 1, 2, 100000.00, 'EWallet', 'Gagal', '2026-10-27 09:00:00')
+ON DUPLICATE KEY UPDATE
+    id_campaign = VALUES(id_campaign),
+    id_donatur = VALUES(id_donatur),
+    nominal = VALUES(nominal),
+    metode_pembayaran = VALUES(metode_pembayaran),
+    status_pembayaran = VALUES(status_pembayaran),
+    tanggal_pembayaran = VALUES(tanggal_pembayaran);

@@ -128,4 +128,33 @@ class CampaignEntity
 
         return $pernyataan->rowCount() > 0;
     }
+
+    /**
+     * Mengambil satu data campaign aktif untuk keperluan donasi publik (SDD SEQ-003)
+     */
+    public function ambilCampaignAktifById(int $idCampaign): ?array
+    {
+        $pernyataan = $this->pdo->prepare(
+            "SELECT * FROM campaign WHERE id_campaign = :id_campaign AND status_campaign = 'Aktif'"
+        );
+        $pernyataan->execute([':id_campaign' => $idCampaign]);
+        $campaign = $pernyataan->fetch();
+
+        return $campaign !== false ? $campaign : null;
+    }
+
+    /**
+     * Memperbarui progres dana terkumpul pada campaign setelah donasi berhasil (SDD Bab 4.1.3 & SEQ-003)
+     */
+    public function perbaruiProgresDana(int $idCampaign, float $nominal): bool
+    {
+        $pernyataan = $this->pdo->prepare(
+            'UPDATE campaign SET dana_terkumpul = dana_terkumpul + :nominal WHERE id_campaign = :id_campaign'
+        );
+
+        return $pernyataan->execute([
+            ':nominal'     => $nominal,
+            ':id_campaign' => $idCampaign,
+        ]);
+    }
 }
