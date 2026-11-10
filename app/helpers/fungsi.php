@@ -119,11 +119,55 @@ function ambilPesan(): ?array
 }
 
 /**
- * Ambil ID pengguna aktif (sementara mengembalikan ID_FUNDRAISER_SEMENTARA)
+ * Cek apakah ada sesi pengguna yang sedang aktif/login
+ */
+function sudahLogin(): bool
+{
+    return !empty($_SESSION['pengguna_aktif']['id_user']);
+}
+
+/**
+ * Ambil data sesi pengguna yang sedang aktif (id_user, email, role)
+ */
+function penggunaAktif(): ?array
+{
+    return $_SESSION['pengguna_aktif'] ?? null;
+}
+
+/**
+ * Ambil peran (role) dari pengguna yang sedang aktif
+ */
+function peranPenggunaAktif(): ?string
+{
+    return $_SESSION['pengguna_aktif']['role'] ?? null;
+}
+
+/**
+ * Ambil ID pengguna aktif (membaca sesi pengguna yang login, dengan fallback ke ID_FUNDRAISER_SEMENTARA)
  */
 function idPenggunaAktif(): int
 {
-    return ID_FUNDRAISER_SEMENTARA;
+    if (!empty($_SESSION['pengguna_aktif']['id_user'])) {
+        return (int) $_SESSION['pengguna_aktif']['id_user'];
+    }
+
+    return defined('ID_FUNDRAISER_SEMENTARA') ? ID_FUNDRAISER_SEMENTARA : 1;
+}
+
+/**
+ * Batasi akses hanya untuk pengguna yang telah masuk (dan memiliki peran tertentu bila ditentukan)
+ */
+function wajibLogin(?string $roleDibutuhkan = null): void
+{
+    if (!sudahLogin()) {
+        setPesan('danger', 'Silakan masuk terlebih dahulu untuk mengakses halaman tersebut.');
+        alihkan('login.php');
+    }
+
+    if ($roleDibutuhkan !== null && peranPenggunaAktif() !== $roleDibutuhkan) {
+        setPesan('danger', 'Anda tidak memiliki hak akses ke halaman tersebut.');
+        alihkan('login.php');
+    }
 }
 
 /**
@@ -139,12 +183,12 @@ function tokenCsrf(): string
 }
 
 /**
- * Tolak POST tanpa/menyandong token anti-CSRF yang tidak cocok
+ * Tolak POST tanpa/menyandang token anti-CSRF yang tidak cocok
  */
-function verifikasiCsrf(): void
+function verifikasiCsrf(string $alihkanKe = 'dashboard_fundraiser.php'): void
 {
     if (!hash_equals(tokenCsrf(), (string) ($_POST['csrf_token'] ?? ''))) {
         setPesan('danger', 'Sesi tidak valid, silakan coba kembali.');
-        alihkan('dashboard_fundraiser.php');
+        alihkan($alihkanKe);
     }
 }

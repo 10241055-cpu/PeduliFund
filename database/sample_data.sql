@@ -3,9 +3,15 @@
 
 USE pedulifund;
 
--- Data contoh pengguna: id_user 1, role Fundraiser
+-- Data contoh pengguna (semua akun pengujian menggunakan kata sandi: 'password'):
+-- 1. Fundraiser: fundraiser@pedulifund.test
+-- 2. Admin:      admin@pedulifund.test
+-- 3. Donatur:    donatur@pedulifund.test
 INSERT INTO pengguna (id_user, email, password, role)
-VALUES (1, 'fundraiser@pedulifund.test', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Fundraiser')
+VALUES
+(1, 'fundraiser@pedulifund.test', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Fundraiser'),
+(2, 'admin@pedulifund.test', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin'),
+(3, 'donatur@pedulifund.test', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Donatur')
 ON DUPLICATE KEY UPDATE
     email = VALUES(email),
     password = VALUES(password),
