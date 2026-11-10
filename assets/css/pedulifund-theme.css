@@ -1,0 +1,602 @@
+/* PeduliFund Design System — pedulifund-theme.css
+   Sumber kebenaran: design.md (Soft Rounded Dashboard UI)
+   Dial: ENERGY 2 • RHYTHM 2 • MOTION 1 (150–200ms ease)*/
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    /* Sage & Mint Palette (design.md Bagian 2.1) */
+    --bg-outer: #E4ECE2;
+    --bg-canvas: #F5F9F4;
+    --bg-tray: #E6EFE5;
+    --surface-white: #FFFFFF;
+    --green-deep: #264634;
+    --green-primary: #568265;
+    --green-mid: #739B80;
+    --green-light: #C5D9C8;
+    --green-pale: #EDF4EC;
+
+    /* Rose & Blush Pink Palette (design.md Bagian 2.2) */
+    --pink-primary: #E66884;
+    --pink-hover: #D2526E;
+    --pink-soft: #FADCE3;
+    --pink-blush: #FFF0F3;
+
+    /* Warna status (design.md Bagian 2.3) */
+    --status-pending-bg: #FDECC8;
+    --status-pending-fg: #8A5A2B;
+    --status-pending-dot: #E58E3A;
+
+    /* Warna tipografi (design.md Bagian 3) */
+    --text-main: #264634;
+    --text-body: #4D6A58;
+    --text-muted: #7E9987;
+
+    /* Radius scale (design.md Bagian 4.1) */
+    --radius-window: 32px;
+    --radius-tray: 28px;
+    --radius-card: 22px;
+    --radius-input: 12px;
+    --radius-pill: 999px;
+
+    /* Elevation (design.md Bagian 4.1, Bagian 4.3) */
+    --shadow-card: 0 12px 28px rgba(38, 70, 52, 0.06);
+    --shadow-pink: 0 8px 20px rgba(230, 104, 132, 0.32);
+    --shadow-pink-cta: 0 10px 25px rgba(230, 104, 132, 0.4);
+    --shadow-window: 0 20px 50px rgba(38, 70, 52, 0.10);
+}
+
+/* ---------- Fondasi ---------- */
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg-outer);
+    color: var(--text-main);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+/* Bingkai jendela aplikasi (design.md Bagian 4.1) — fluid mengikuti lebar layar */
+.pf-app-window {
+    background-color: var(--bg-canvas);
+    border: 4px solid var(--green-primary);
+    border-radius: var(--radius-window);
+    box-shadow: var(--shadow-window);
+    margin: 24px 24px 40px;
+    overflow: hidden;
+}
+
+/* ---------- Tipografi (design.md Bagian 3) ---------- */
+.pf-h1 {
+    font-size: clamp(28px, 4vw, 34px);
+    font-weight: 800;
+    color: var(--green-deep);
+    line-height: 1.2;
+    letter-spacing: -0.8px;
+    margin: 0;
+}
+
+.pf-modul-judul {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--green-deep);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin: 0;
+}
+
+/* Titik aksen pink bulat 10px diapit judul modul */
+.pf-modul-judul::before,
+.pf-modul-judul::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--pink-primary);
+    flex: none;
+}
+
+.pf-subjudul {
+    font-size: 15px;
+    color: var(--text-body);
+    margin: 0;
+}
+
+/* Wordmark brand: Peduli(gelap) Fund(sage) . (pink) */
+.pf-wordmark {
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--green-deep);
+    white-space: nowrap;
+}
+
+.pf-wordmark .pf-fund {
+    color: var(--green-primary);
+}
+
+.pf-wordmark .pf-titik {
+    color: var(--pink-primary);
+}
+
+/* Angka statistik pakai digit sejajar (design.md Bagian 3) */
+.pf-metrik-nilai {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--green-primary);
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.pf-metrik-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin: 0 0 6px;
+}
+
+/* ---------- Kontainer berlapis (design.md Bagian 4.1) ---------- */
+.pf-tray {
+    background-color: var(--bg-tray);
+    border-radius: var(--radius-tray);
+    padding: 28px 32px;
+    margin-bottom: 28px;
+}
+
+.pf-card {
+    background-color: var(--surface-white);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    border: none;
+}
+
+/* ---------- Navbar pill melayang (design.md Bagian 4.2, Bagian 6.1) ---------- */
+.pf-navbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--surface-white);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-card);
+    margin: 20px 24px 0;
+    padding: 10px 16px;
+}
+
+.pf-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.pf-menu {
+    display: inline-flex;
+    gap: 4px;
+    background-color: var(--green-pale);
+    border-radius: var(--radius-pill);
+    padding: 6px;
+}
+
+.pf-menu-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-body);
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.pf-menu-item:hover {
+    color: var(--green-deep);
+}
+
+/* Item aktif: latar putih + dot pink 7px (design.md Bagian 6.1) */
+.pf-menu-item-aktif {
+    background-color: var(--surface-white);
+    color: var(--green-deep);
+}
+
+.pf-menu-item-aktif::after {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--pink-primary);
+    flex: none;
+}
+
+/* ---------- Zona isi ---------- */
+.pf-main {
+    padding: 24px 24px 8px;
+}
+
+.bagian-halaman {
+    margin-bottom: 1.5rem;
+}
+
+/* ---------- Tombol (design.md Bagian 4.3, Bagian 5) ---------- */
+.btn-pf-cta {
+    background-color: var(--pink-primary);
+    color: #FFFFFF;
+    font-weight: 800;
+    text-decoration: none;
+    border-radius: var(--radius-pill);
+    padding: 12px 28px;
+    border: none;
+    box-shadow: var(--shadow-pink-cta);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.btn-pf-cta:hover {
+    background-color: var(--pink-hover);
+    transform: translateY(-1px);
+    color: #FFFFFF;
+}
+
+/* Tombol sekunder kapsul outline (design.md Bagian 4.2, Bagian 6.1 tombol LOGIN) */
+.btn-pf-outline {
+    background-color: var(--green-pale);
+    color: var(--green-deep);
+    font-weight: 800;
+    text-decoration: none;
+    border: 1.5px solid var(--green-light);
+    border-radius: var(--radius-pill);
+    padding: 12px 26px;
+    transition: border-color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.btn-pf-outline:hover {
+    border-color: var(--green-primary);
+    color: var(--green-deep);
+}
+
+.btn-pf-cta:focus-visible,
+.btn-pf-outline:focus-visible,
+.pf-menu-item:focus-visible {
+    outline: 2px solid var(--pink-primary);
+    outline-offset: 2px;
+}
+
+/* Tombol kecil di bar filter */
+.pf-filter .btn {
+    background-color: var(--surface-white);
+    border: 1.5px solid var(--green-light);
+    color: var(--green-deep);
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.pf-filter .btn:hover,
+.pf-filter .btn:focus {
+    background-color: var(--surface-white);
+    border-color: var(--green-primary);
+    color: var(--green-deep);
+}
+
+/* ---------- Badge status kapsul (design.md Bagian 2.3) ---------- */
+.pf-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px;
+    border-radius: var(--radius-pill);
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.pf-badge-pil {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: var(--radius-pill);
+}
+
+/* AKTIF: kapsul putih + pil sage */
+.pf-badge--aktif {
+    background-color: var(--surface-white);
+    box-shadow: var(--shadow-card);
+}
+
+.pf-badge--aktif .pf-badge-pil {
+    background-color: var(--green-primary);
+    color: #FFFFFF;
+}
+
+/* SELESAI: badge sage solid, label putih */
+.pf-badge--selesai {
+    background-color: var(--green-primary);
+}
+
+.pf-badge--selesai .pf-badge-pil {
+    color: #FFFFFF;
+}
+
+/* PENDING: latar #FDECC8, teks #8A5A2B, indikator oranye */
+.pf-badge--pending {
+    background-color: var(--status-pending-bg);
+    color: var(--status-pending-fg);
+}
+
+.pf-badge--pending::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--status-pending-dot);
+    margin-left: 8px;
+    flex: none;
+}
+
+/* DITOLAK / DIBEKUKAN: latar #FFF0F3, teks rose, tepi #FADCE3 */
+.pf-badge--ditolak {
+    background-color: var(--pink-blush);
+    color: var(--pink-primary);
+    border: 1px solid var(--pink-soft);
+}
+
+/* Badge netral */
+.pf-badge--netral {
+    background-color: var(--green-pale);
+    color: var(--text-body);
+}
+
+/* Tombol hapus kecil: memakai palet badge DITOLAK (design.md Bagian 2.3) */
+.btn-pf-hapus {
+    background-color: var(--pink-blush);
+    color: var(--pink-primary);
+    border: 1.5px solid var(--pink-soft);
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 6px 16px;
+    transition: border-color 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-pf-hapus:hover {
+    border-color: var(--pink-primary);
+}
+
+/* ---------- Indikator progres donasi (design.md Bagian 4.5) ---------- */
+.progress {
+    height: 10px;
+    background-color: var(--green-pale);
+    border-radius: var(--radius-pill);
+}
+
+.progress .progress-bar {
+    background-color: var(--pink-primary);
+    border-radius: var(--radius-pill);
+}
+
+/* ---------- Form input (design.md Bagian 4.4) ---------- */
+.form-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-body);
+}
+
+.form-control,
+.form-select {
+    background-color: var(--green-pale);
+    border: 1.5px solid var(--green-light);
+    border-radius: var(--radius-input);
+    color: var(--green-deep);
+    font-weight: 600;
+    padding: 10px 14px;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--surface-white);
+    border-color: var(--green-primary);
+    box-shadow: 0 0 0 3px rgba(86, 130, 101, 0.18);
+    color: var(--green-deep);
+}
+
+.form-text {
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+/* Bar filter kapsul: pencarian pill (design.md Bagian 4.4) */
+.pf-filter .form-control,
+.pf-filter .form-select {
+    border-radius: var(--radius-pill);
+}
+
+/* Tombol bawaan input file mengikuti tema */
+.form-control[type='file']::file-selector-button {
+    background-color: var(--green-pale);
+    border: 1.5px solid var(--green-light);
+    border-radius: var(--radius-pill);
+    color: var(--green-deep);
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 7px 16px;
+    margin-right: 12px;
+    transition: border-color 0.2s ease;
+}
+
+.form-control[type='file']::file-selector-button:hover {
+    border-color: var(--green-primary);
+}
+
+/* ---------- Notifikasi flash (design.md Bagian 2.3: warna status) ---------- */
+.alert {
+    border-radius: 16px;
+    font-weight: 600;
+}
+
+.alert-success {
+    background-color: var(--green-pale);
+    border: 1px solid var(--green-light);
+    color: var(--green-deep);
+}
+
+.alert-danger {
+    background-color: var(--pink-blush);
+    border: 1px solid var(--pink-soft);
+    color: var(--pink-primary);
+}
+
+/* .btn-close pada alert rose tetap kontras */
+.alert-danger .btn-close {
+    filter: grayscale(100%) brightness(0.4) sepia(1) hue-rotate(-30deg) saturate(3);
+}
+
+/* ---------- Tabel data ---------- */
+.pf-card-tabel {
+    overflow: hidden;
+}
+
+.pf-card-tabel .table thead {
+    background-color: var(--green-pale);
+}
+
+.pf-card-tabel .table thead th {
+    background-color: var(--green-pale);
+    color: var(--green-deep);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 2px solid var(--green-light);
+}
+
+.pf-card-tabel .table td {
+    color: var(--text-body);
+    border-color: var(--green-pale);
+}
+
+.pf-card-tabel .table-hover tbody tr:hover td {
+    background-color: var(--green-pale);
+}
+
+/* ---------- Detail tabel dashboard ---------- */
+.pf-teks-judul {
+    color: var(--green-deep);
+    font-size: 14.5px;
+}
+
+/* Nominal & tanggal: digit sejajar (design.md Bagian 3) */
+.pf-angka {
+    font-variant-numeric: tabular-nums;
+}
+
+.pf-teks-bantu {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+/* ---------- Footer kartu putih (design.md Bagian 6.5) ---------- */
+.pf-footer {
+    padding: 12px 24px 24px;
+}
+
+.pf-footer-card {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--surface-white);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    padding: 18px 26px;
+}
+
+.pf-footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pf-footer-brand .pf-wordmark {
+    font-size: 16px;
+}
+
+.pf-footer-copy {
+    color: var(--text-muted);
+    font-size: 12.5px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* ---------- Aksesibilitas: MOTION 1 mendukung reduce ---------- */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .btn-pf-cta:hover {
+        transform: none;
+    }
+}
+
+/* ---------- Adaptif layar kecil (design.md: web responsif) ---------- */
+@media (max-width: 767px) {
+    .pf-app-window {
+        margin: 12px 12px 20px;
+    }
+
+    .pf-navbar {
+        margin: 12px 12px 0;
+    }
+
+    .pf-main {
+        padding: 16px 14px 8px;
+    }
+
+    .pf-tray {
+        padding: 18px 16px;
+    }
+
+    .pf-footer {
+        padding: 8px 12px 16px;
+    }
+}
