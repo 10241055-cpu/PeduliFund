@@ -23,13 +23,17 @@ require __DIR__ . '/layout/header.php';
                     <rect x="30" y="50" width="250" height="200" rx="20" fill="var(--green-pale)" stroke="var(--green-light)" stroke-width="3"/>
                     <circle cx="330" cy="70" r="34" fill="var(--pink-soft)"/>
                     <circle cx="90" cy="255" r="22" fill="var(--pink-soft)"/>
-                    <path d="M155 118 c-18-22-56-8-56 20 0 30 56 58 56 58 s56-28 56-58 c0-28-38-42-56-20 z" fill="var(--pink-primary)"/>
+                    <ellipse cx="155" cy="166" rx="52" ry="14" fill="var(--pink-primary)"/>
+                    <ellipse cx="155" cy="146" rx="52" ry="14" fill="var(--pink-primary)" stroke="var(--surface-white)" stroke-width="3"/>
+                    <ellipse cx="155" cy="126" rx="52" ry="14" fill="var(--pink-primary)" stroke="var(--surface-white)" stroke-width="3"/>
+                    <text x="155" y="131" text-anchor="middle" font-size="13" font-weight="700" fill="var(--surface-white)">Rp</text>
                     <rect x="70" y="190" width="170" height="14" rx="7" fill="var(--green-light)"/>
                     <rect x="70" y="190" width="118" height="14" rx="7" fill="var(--green-primary)"/>
                     <rect x="252" y="140" width="104" height="110" rx="14" fill="var(--surface-white)" stroke="var(--green-light)" stroke-width="3"/>
                     <rect x="268" y="166" width="72" height="10" rx="5" fill="var(--green-light)"/>
                     <rect x="268" y="186" width="56" height="10" rx="5" fill="var(--green-light)"/>
-                    <path d="M304 222 c-8-10-26-4-26 10 0 14 26 26 26 26 s26-12 26-26 c0-14-18-20-26-10 z" fill="var(--pink-primary)"/>
+                    <circle cx="304" cy="238" r="20" fill="var(--pink-soft)"/>
+                    <path d="M294 238 l7 7 l13 -14" stroke="var(--green-primary)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
             <div class="col-lg-7">

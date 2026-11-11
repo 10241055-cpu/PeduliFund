@@ -214,7 +214,7 @@ Layar **UI-001 Beranda** adalah **studi kasus acuan konkret** (*concrete baselin
 * **Baki Kontainer Hero:** Latar `--bg-tray` (`#E6EFE5`), `border-radius: 28px`, padding `36px 40px`, dilengkapi ornamen latar gelombang organik (`.wave-bg-1` sage gradient & `.wave-bg-2` blush pink gradient).
 * **Bar Indikator Atas Hero:**
   * Lencana status switch: Kapsul putih dengan pil toggle `AKTIF` berlatar rose pink `#E66884` dan teks label `Platform Galang Dana Terverifikasi`.
-  * Tiga tombol ikon bulat pink (`.circle-pink-btn`, `38px x 38px`, border-radius 50%, latar `#E66884`) mewakili 3 pilar: (1) Perisai (Verifikasi Akun), (2) Dokumen (Transparansi LPJ), (3) Hati (Penyaluran Tepat Sasaran).
+  * Tiga tombol ikon bulat pink (`.circle-pink-btn`, `38px x 38px`, border-radius 50%, latar `#E66884`) mewakili 3 pilar: (1) Perisai (Verifikasi Akun), (2) Dokumen (Transparansi LPJ), (3) Tumpukan Koin (Penyaluran Tepat Sasaran). Keputusan desain: platform tidak memakai ikonografi hati/love di mana pun — motif donasi memakai koin.
 * **Judul & Subjudul Hero:**
   * H1 Headline: `YUK DONASI,` (`#264634`) baris atas, dan `SALURKAN KEBAIKAN` (`#568265`) baris bawah.
   * Subjudul: Teks deskripsi ramah dan ringkas (`15px`, `#4D6A58`).
