@@ -82,7 +82,7 @@ Prinsip utama tata letak PeduliFund adalah mengelompokkan kartu-kartu putih di d
 * Desain mengambang penuh (*floating pill*) dengan `border-radius: 999px`, latar `#FFFFFF`, dan bayangan kartu halus.
 * **Logo:** Wordmark `PeduliFund.` dengan kata `Fund` berwarna hijau sage dan titik penutup pink.
 * **Menu Kapsul:** Pembungkus hijau pucat (`#EDF4EC`), item aktif berlatar putih dengan dot indikator pink `7px`.
-* **Aksi Otentikasi / Profil:** Tombol sekunder kapsul outline hijau pucat dan tombol aksi utama kapsul solid *Rose Pink*.
+* **Aksi Otentikasi / Profil:** Seluruh tombol aksi (Masuk, Daftar) kapsul solid *Rose Pink* dengan ukuran seragam — satu gaya, tidak bercampur outline.
 
 ### 4.3 Tombol & Tombol Ikon Bulat (*Buttons & Micro-Actions*)
 * **Tombol CTA Utama (`.btn-pf-cta`, `.btn-yuk-donasi`):** Kapsul penuh (`border-radius: 999px`), latar `#E66884`, teks `#FFFFFF`, bayangan `0 10px 25px rgba(230, 104, 132, 0.4)`. Dilengkapi opsi lingkaran dalam putih (`34px x 34px`) dengan ikon panah rose pink.
