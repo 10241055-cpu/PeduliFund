@@ -29,7 +29,10 @@ $pesan = ambilPesan();
                         $urlDashboard = BASE_URL . '/dashboard_admin.php';
                     }
                     ?>
-                    <a class="pf-menu-item pf-menu-item-aktif" href="<?= e($urlDashboard) ?>">Dashboard</a>
+                    <a class="pf-menu-item <?= (isset($judulHalaman) && strpos($judulHalaman, 'Review Pencairan') === false) ? 'pf-menu-item-aktif' : '' ?>" href="<?= e($urlDashboard) ?>">Dashboard</a>
+                    <?php if ($peran === 'Admin'): ?>
+                        <a class="pf-menu-item <?= (isset($judulHalaman) && strpos($judulHalaman, 'Review Pencairan') !== false) ? 'pf-menu-item-aktif' : '' ?>" href="<?= e(BASE_URL) ?>/review_pencairan.php">Review Pencairan</a>
+                    <?php endif; ?>
                 <?php else: ?>
                     <a class="pf-menu-item <?= (isset($judulHalaman) && strpos($judulHalaman, 'Masuk') !== false) ? 'pf-menu-item-aktif' : '' ?>" href="<?= e(BASE_URL) ?>/login.php">Masuk</a>
                 <?php endif; ?>

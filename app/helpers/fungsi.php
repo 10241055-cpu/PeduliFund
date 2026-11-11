@@ -65,10 +65,16 @@ function hitungPersen($terkumpul, $target): int
 function kelasBadgeStatus($status): string
 {
     $kelas = [
-        'Pending' => 'pf-badge--pending',
-        'Aktif'   => 'pf-badge--aktif',
-        'Ditolak' => 'pf-badge--ditolak',
-        'Selesai' => 'pf-badge--selesai',
+        'Pending'       => 'pf-badge--pending',
+        'Menunggu'      => 'pf-badge--pending',
+        'Aktif'         => 'pf-badge--aktif',
+        'Disetujui'     => 'pf-badge--aktif',
+        'Dicairkan'     => 'pf-badge--aktif',
+        'Valid'         => 'pf-badge--aktif',
+        'Ditolak'       => 'pf-badge--ditolak',
+        'Dibekukan'     => 'pf-badge--ditolak',
+        'Selesai'       => 'pf-badge--selesai',
+        'Terverifikasi' => 'pf-badge--selesai',
     ];
 
     return $kelas[$status] ?? 'pf-badge--netral';

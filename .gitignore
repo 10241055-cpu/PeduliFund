@@ -9,3 +9,6 @@ uploads/dokumen_campaign/*
 !uploads/dokumen_campaign/.htaccess
 uploads/gambar_campaign/*
 !uploads/gambar_campaign/.gitkeep
+uploads/dokumen_lpj/*
+!uploads/dokumen_lpj/.gitkeep
+!uploads/dokumen_lpj/.htaccess

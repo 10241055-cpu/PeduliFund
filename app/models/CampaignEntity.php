@@ -157,4 +157,67 @@ class CampaignEntity
             ':id_campaign' => $idCampaign,
         ]);
     }
+
+    /**
+     * Memeriksa status campaign berdasarkan ID (SDD 4.1.4)
+     */
+    public function cekStatusCampaign(int $idCampaign): ?string
+    {
+        $pernyataan = $this->pdo->prepare(
+            'SELECT status_campaign FROM campaign WHERE id_campaign = :id_campaign LIMIT 1'
+        );
+        $pernyataan->execute([':id_campaign' => $idCampaign]);
+        $status = $pernyataan->fetchColumn();
+
+        return $status !== false ? (string) $status : null;
+    }
+
+    /**
+     * Menutup campaign aktif milik fundraiser yang sudah melewati deadline menjadi Selesai
+     */
+    public function tutupCampaignKedaluwarsa(int $idFundraiser, string $hariIni): int
+    {
+        $pernyataan = $this->pdo->prepare(
+            "UPDATE campaign
+             SET status_campaign = 'Selesai'
+             WHERE id_fundraiser = :id_fundraiser
+               AND status_campaign = 'Aktif'
+               AND deadline < :hari_ini"
+        );
+        $pernyataan->execute([
+            ':id_fundraiser' => $idFundraiser,
+            ':hari_ini'      => $hariIni,
+        ]);
+
+        return $pernyataan->rowCount();
+    }
+
+    /**
+     * Menghentikan seluruh campaign aktif milik fundraiser ketika akun dibekukan (SDD 3.1.4)
+     */
+    public function hentikanCampaignAktifByFundraiser(int $idFundraiser): int
+    {
+        $pernyataan = $this->pdo->prepare(
+            "UPDATE campaign
+             SET status_campaign = 'Selesai'
+             WHERE id_fundraiser = :id_fundraiser
+               AND status_campaign = 'Aktif'"
+        );
+        $pernyataan->execute([':id_fundraiser' => $idFundraiser]);
+
+        return $pernyataan->rowCount();
+    }
+
+    /**
+     * Menghitung jumlah campaign berstatus Pending untuk ringkasan dashboard admin
+     */
+    public function hitungCampaignMenunggu(): int
+    {
+        $pernyataan = $this->pdo->prepare(
+            "SELECT COUNT(*) FROM campaign WHERE status_campaign = 'Pending'"
+        );
+        $pernyataan->execute();
+
+        return (int) $pernyataan->fetchColumn();
+    }
 }
