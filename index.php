@@ -1,5 +1,6 @@
 <?php
-// Entri utama aplikasi PeduliFund: mengarahkan ke dashboard bila sudah masuk, atau ke halaman login bila belum
+// Entri utama aplikasi PeduliFund: pengunjung melihat Beranda publik (UI-001),
+// pengguna yang sudah masuk diarahkan ke dashboard sesuai perannya
 
 require_once __DIR__ . '/app/bootstrap.php';
 
@@ -13,5 +14,5 @@ if (sudahLogin()) {
         alihkan('dashboard_fundraiser.php');
     }
 } else {
-    alihkan('login.php');
+    require __DIR__ . '/views/beranda.php';
 }

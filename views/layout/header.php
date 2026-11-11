@@ -36,6 +36,9 @@ $pesan = ambilPesan();
                         <a class="pf-menu-item <?= (isset($judulHalaman) && strpos($judulHalaman, 'Review Pencairan') !== false) ? 'pf-menu-item-aktif' : '' ?>" href="<?= e(BASE_URL) ?>/review_pencairan.php">Review Pencairan</a>
                     <?php endif; ?>
                 <?php else: ?>
+                    <a class="pf-menu-item <?= (isset($judulHalaman) && $judulHalaman === 'Beranda') ? 'pf-menu-item-aktif' : '' ?>" href="<?= e(BASE_URL) ?>/index.php">Beranda</a>
+                    <a class="pf-menu-item" href="<?= e(BASE_URL) ?>/index.php#tentang">Tentang</a>
+                    <a class="pf-menu-item" href="<?= e(BASE_URL) ?>/index.php#cara-kerja">Cara Kerja</a>
                     <a class="pf-menu-item <?= (isset($judulHalaman) && strpos($judulHalaman, 'Masuk') !== false) ? 'pf-menu-item-aktif' : '' ?>" href="<?= e(BASE_URL) ?>/login.php">Masuk</a>
                 <?php endif; ?>
             </nav>
