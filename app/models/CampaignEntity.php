@@ -144,6 +144,54 @@ class CampaignEntity
     }
 
     /**
+     * Daftar campaign untuk halaman publik UI-005: hanya berstatus Aktif dan belum melewati deadline,
+     * dengan pencarian judul serta filter jenis (SDD 5.2.5)
+     */
+    public function ambilCampaignPublik(string $cari = '', string $jenis = '', string $hariIni = null): array
+    {
+        $sql = "SELECT * FROM campaign
+                WHERE status_campaign = 'Aktif'
+                  AND deadline >= :hari_ini";
+        $parameter = [':hari_ini' => $hariIni ?? date('Y-m-d')];
+
+        $cari = trim($cari);
+        if ($cari !== '') {
+            $sql .= ' AND judul LIKE :cari';
+            // % dan _ punya makna khusus di LIKE; jadikan literal agar hasil cari presisi
+            $parameter[':cari'] = '%' . addcslashes($cari, '%_\\') . '%';
+        }
+
+        if ($jenis !== '' && in_array($jenis, self::DAFTAR_JENIS, true)) {
+            $sql .= ' AND jenis = :jenis';
+            $parameter[':jenis'] = $jenis;
+        }
+
+        $sql .= ' ORDER BY id_campaign DESC';
+
+        $pernyataan = $this->pdo->prepare($sql);
+        $pernyataan->execute($parameter);
+
+        return $pernyataan->fetchAll();
+    }
+
+    /**
+     * Mengambil satu campaign yang boleh dilihat publik untuk UI-006: Aktif atau Selesai (Ditutup);
+     * Pending dan Ditolak tidak dipublikasikan
+     */
+    public function ambilCampaignPublikById(int $idCampaign): ?array
+    {
+        $pernyataan = $this->pdo->prepare(
+            "SELECT * FROM campaign
+             WHERE id_campaign = :id_campaign
+               AND status_campaign IN ('Aktif', 'Selesai')"
+        );
+        $pernyataan->execute([':id_campaign' => $idCampaign]);
+        $campaign = $pernyataan->fetch();
+
+        return $campaign !== false ? $campaign : null;
+    }
+
+    /**
      * Memperbarui progres dana terkumpul pada campaign setelah donasi berhasil (SDD Bab 4.1.3 & SEQ-003)
      */
     public function perbaruiProgresDana(int $idCampaign, float $nominal): bool

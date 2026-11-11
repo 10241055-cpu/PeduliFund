@@ -42,6 +42,48 @@ class DonationController
     }
 
     /**
+     * Menampilkan daftar campaign publik (UI-005): pencarian, filter jenis, kartu campaign aktif
+     */
+    public function tampilkanDaftarCampaign(): void
+    {
+        $cari = trim((string) ($_GET['cari'] ?? ''));
+        $jenis = trim((string) ($_GET['jenis'] ?? ''));
+        if (!in_array($jenis, CampaignEntity::DAFTAR_JENIS, true)) {
+            $jenis = '';
+        }
+
+        $daftarCampaign = $this->campaignEntity->ambilCampaignPublik($cari, $jenis);
+        $daftarJenis = CampaignEntity::DAFTAR_JENIS;
+
+        require __DIR__ . '/../../views/daftar_campaign.php';
+    }
+
+    /**
+     * Menampilkan detail satu campaign publik (UI-006) beserta donatur terbarunya
+     */
+    public function tampilkanDetailCampaign(): void
+    {
+        $idCampaign = (int) ($_GET['id'] ?? 0);
+        $campaign = $idCampaign > 0
+            ? $this->campaignEntity->ambilCampaignPublikById($idCampaign)
+            : null;
+
+        if ($campaign === null) {
+            setPesan('danger', 'Campaign tidak ditemukan atau belum dipublikasikan.');
+            alihkan('daftar_campaign.php');
+        }
+
+        $hariIni = date('Y-m-d');
+        $sudahBerakhir = $campaign['deadline'] < $hariIni || $campaign['status_campaign'] !== 'Aktif';
+        $sisaHari = $sudahBerakhir
+            ? 0
+            : (int) ceil((strtotime($campaign['deadline']) - strtotime($hariIni)) / 86400);
+        $donaturTerbaru = $this->donasiEntity->ambilDonaturTerbaruByCampaign($idCampaign);
+
+        require __DIR__ . '/../../views/detail_campaign.php';
+    }
+
+    /**
      * Memproses transaksi donasi dan simulasi pembayaran (SDD ACT-003 & SEQ-003)
      */
     public function prosesDonasi(): void

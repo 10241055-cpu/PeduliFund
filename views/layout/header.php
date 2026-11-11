@@ -19,6 +19,8 @@ $pesan = ambilPesan();
         </a>
         <div class="d-flex align-items-center gap-2">
             <nav class="pf-menu" aria-label="Menu utama">
+                <?php $menuCampaignAktif = isset($judulHalaman) && in_array($judulHalaman, ['Daftar Campaign', 'Detail Campaign'], true); ?>
+                <a class="pf-menu-item <?= $menuCampaignAktif ? 'pf-menu-item-aktif' : '' ?>" href="<?= e(BASE_URL) ?>/daftar_campaign.php">Campaign</a>
                 <?php if (sudahLogin()): ?>
                     <?php
                     $peran = peranPenggunaAktif();
