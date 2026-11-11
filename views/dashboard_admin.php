@@ -53,7 +53,7 @@ $pengguna = penggunaAktif();
                 <div class="pf-card p-4 text-center">
                     <h3 class="h6 fw-bold mb-2">Verifikasi Campaign</h3>
                     <p class="small text-muted mb-3">Tinjau dan setujui campaign baru dari fundraiser</p>
-                    <a href="<?= e(BASE_URL) ?>/dashboard_fundraiser.php" class="btn-pf-cta w-100 justify-content-center">Tinjau Campaign</a>
+                    <button class="btn-pf-outline w-100" disabled title="Halaman verifikasi campaign (UI-013) belum tersedia">Tinjau Campaign</button>
                 </div>
             </div>
             <div class="col-md-4">
