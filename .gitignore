@@ -9,6 +9,9 @@ uploads/dokumen_campaign/*
 !uploads/dokumen_campaign/.htaccess
 uploads/gambar_campaign/*
 !uploads/gambar_campaign/.gitkeep
+!uploads/gambar_campaign/contoh_panti_asuhan.jpg
+!uploads/gambar_campaign/contoh_banjir.jpg
+!uploads/gambar_campaign/contoh_beasiswa.jpg
 uploads/dokumen_lpj/*
 !uploads/dokumen_lpj/.gitkeep
 !uploads/dokumen_lpj/.htaccess

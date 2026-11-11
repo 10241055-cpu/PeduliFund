@@ -20,9 +20,9 @@ ON DUPLICATE KEY UPDATE
 -- Data contoh 3 campaign milik id_fundraiser 1 (dokumen_campaign: 'contoh_dokumen.pdf')
 INSERT INTO campaign (id_campaign, id_fundraiser, judul, jenis, target_dana, dana_terkumpul, deadline, dokumen_campaign, status_campaign, deskripsi, gambar_campaign)
 VALUES
-(1, 1, 'Bantu Renovasi Panti Asuhan', 'Sosial', 25000000.00, 7500000.00, '2026-12-31', 'contoh_dokumen.pdf', 'Aktif', 'Penggalangan dana untuk renovasi fasilitas asrama dan ruang belajar anak-anak panti asuhan.', NULL),
-(2, 1, 'Bantuan Korban Banjir', 'Bencana', 50000000.00, 0.00, '2026-12-15', 'contoh_dokumen.pdf', 'Pending', 'Penyaluran bantuan logistik, pakaian layak pakai, dan makanan siap saji untuk warga terdampak banjir.', NULL),
-(3, 1, 'Beasiswa Anak Desa', 'Pendidikan', 10000000.00, 4200000.00, '2026-10-01', 'contoh_dokumen.pdf', 'Selesai', 'Program bantuan biaya sekolah dan perlengkapan belajar bagi anak-anak berprestasi di pelosok desa.', NULL)
+(1, 1, 'Bantu Renovasi Panti Asuhan', 'Sosial', 25000000.00, 7500000.00, '2026-12-31', 'contoh_dokumen.pdf', 'Aktif', 'Penggalangan dana untuk renovasi fasilitas asrama dan ruang belajar anak-anak panti asuhan.', 'contoh_panti_asuhan.jpg'),
+(2, 1, 'Bantuan Korban Banjir', 'Bencana', 50000000.00, 0.00, '2026-12-15', 'contoh_dokumen.pdf', 'Pending', 'Penyaluran bantuan logistik, pakaian layak pakai, dan makanan siap saji untuk warga terdampak banjir.', 'contoh_banjir.jpg'),
+(3, 1, 'Beasiswa Anak Desa', 'Pendidikan', 10000000.00, 4200000.00, '2026-10-01', 'contoh_dokumen.pdf', 'Selesai', 'Program bantuan biaya sekolah dan perlengkapan belajar bagi anak-anak berprestasi di pelosok desa.', 'contoh_beasiswa.jpg')
 ON DUPLICATE KEY UPDATE
     id_fundraiser = VALUES(id_fundraiser),
     judul = VALUES(judul),
