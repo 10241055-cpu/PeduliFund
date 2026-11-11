@@ -32,3 +32,20 @@ CREATE TABLE IF NOT EXISTS campaign (
         FOREIGN KEY (id_fundraiser) REFERENCES pengguna (id_user)
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabel donasi (SDD Bagian 4.3 Tabel 4.5: Transaksi Donasi)
+CREATE TABLE IF NOT EXISTS donasi (
+    id_donasi INT AUTO_INCREMENT PRIMARY KEY,
+    id_campaign INT NOT NULL,
+    id_donatur INT NOT NULL,
+    nominal DECIMAL(15,2) NOT NULL,
+    metode_pembayaran ENUM('Transfer Bank', 'EWallet', 'QRIS') NOT NULL,
+    status_pembayaran ENUM('Berhasil', 'Gagal') NOT NULL,
+    tanggal_pembayaran DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_donasi_campaign
+        FOREIGN KEY (id_campaign) REFERENCES campaign (id_campaign)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_donasi_pengguna
+        FOREIGN KEY (id_donatur) REFERENCES pengguna (id_user)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
