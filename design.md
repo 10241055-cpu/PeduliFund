@@ -61,7 +61,7 @@ Digunakan untuk merepresentasikan status data pada *campaign*, donasi, pencairan
 * **Font Keluarga Utama:** `'Plus Jakarta Sans'`, sans-serif (mendukung keterbacaan angka nominal Rupiah dan bentuk geometris ramah).
 * **Hierarki Teks Standar:**
   * **Page / Hero Headline (H1):** `32px` – `36px`, `font-weight: 800`, warna `--green-deep` (`#264634`), `line-height: 1.2`, `letter-spacing: -0.8px`.
-  * **Section / Page Module Title (H2):** `20px` – `24px`, `font-weight: 800`, warna `--green-deep`, diapit/dilengkapi titik aksen pink bulat (`10px`).
+  * **Section / Page Module Title (H2):** `20px` – `24px`, `font-weight: 800`, warna `--green-deep`. Tanpa ornamen titik di kiri-kanan judul.
   * **Card / Widget Title (H3):** `16px` – `18px`, `font-weight: 800`, warna `--green-deep`, `line-height: 1.35`.
   * **Brand Wordmark:** `18px` – `20px`, `font-weight: 800`, warna `--green-deep` dengan pembeda kata `Fund` (`--green-primary`) dan titik penutup pink (`.`).
   * **Nilai Metrik Statistik (Data Numbers):** `20px` – `28px`, `font-weight: 800`, warna `--green-primary` atau `--pink-primary` (`font-variant-numeric: tabular-nums`).
@@ -229,7 +229,7 @@ Layar **UI-001 Beranda** adalah **studi kasus acuan konkret** (*concrete baselin
     3. **Wajib LPJ Audit Nota Maks. 1 Bulan:** Ikon dokumen audit centang.
 
 ### 6.3 Zona Edukasi ("Apa Itu PeduliFund?")
-* **Judul Modul:** Teks `APA ITU PEDULIFUND?` diapit dua titik aksen pink bulat (`10px`).
+* **Judul Modul:** Teks `APA ITU PEDULIFUND?` — tebal hijau tua, tanpa ornamen titik.
 * **Tata Letak Asimetris (2 Kolom):**
   * **Kolom Kiri — Kluster Widget Visual:**
     * **Kartu Kembar Mini:**
@@ -243,7 +243,7 @@ Layar **UI-001 Beranda** adalah **studi kasus acuan konkret** (*concrete baselin
     * Dua baris fitur unggulan berlatar `#EDF4EC` dengan kotak ikon centang pink (`26px x 26px`) dan sakelar mini status hijau `[ON] AKTIF`.
 
 ### 6.4 Zona Alur Layanan ("Cara Kerja")
-* **Judul Modul:** Teks `CARA KERJA` diapit dua titik aksen pink bulat (`10px`).
+* **Judul Modul:** Teks `CARA KERJA` — tebal hijau tua, tanpa ornamen titik.
 * **Tiga Kartu Langkah Putih Sejajar:**
   * Masing-masing kartu menggunakan lingkaran nomor ganda:
     * **Langkah 1:** Lingkaran luar putus-putus rose pink + lingkaran dalam solid rose pink (`#E66884`) dengan angka `1`. Judul: *Pilih atau Buat Campaign*. Tag status: *Terverifikasi Admin*.

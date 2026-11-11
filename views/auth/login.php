@@ -8,7 +8,6 @@ require __DIR__ . '/../layout/header.php';
             <div class="col-12 col-md-8 col-lg-5">
                 <div class="pf-card p-4 p-md-5">
                     <div class="text-center mb-4">
-                        <div class="pf-modul-judul justify-content-center mb-2">AUTENTIKASI</div>
                         <h1 class="pf-h1 fs-3">Masuk ke Akun</h1>
                         <p class="pf-subjudul mb-0 mt-1">Silakan masukkan email dan kata sandi Anda</p>
                     </div>

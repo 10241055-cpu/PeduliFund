@@ -6,7 +6,6 @@ require __DIR__ . '/../layout/header.php';
     <div class="pf-tray">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div>
-                <div class="pf-modul-judul mb-1">TRANSPARANSI LPJ</div>
                 <h1 class="pf-h1">Unggah LPJ dan Bukti Nota</h1>
                 <p class="pf-subjudul mb-0 mt-1">Pencairan telah disetujui. Laporkan penggunaan dana untuk verifikasi transparansi.</p>
             </div>

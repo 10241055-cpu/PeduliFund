@@ -89,17 +89,6 @@ body {
     margin: 0;
 }
 
-/* Titik aksen pink bulat 10px diapit judul modul */
-.pf-modul-judul::before,
-.pf-modul-judul::after {
-    content: '';
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: var(--pink-primary);
-    flex: none;
-}
-
 .pf-subjudul {
     font-size: 15px;
     color: var(--text-body);

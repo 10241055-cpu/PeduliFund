@@ -9,7 +9,6 @@ $nilaiLama = static function (string $nama) use ($old): string {
     <div class="pf-tray">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div>
-                <div class="pf-modul-judul mb-1">PENCAIRAN DANA</div>
                 <h1 class="pf-h1">Pengajuan Pencairan Dana</h1>
                 <p class="pf-subjudul mb-0 mt-1">Ajukan pencairan seluruh dana terkumpul ke rekening tujuan Anda.</p>
             </div>

@@ -8,7 +8,6 @@ require __DIR__ . '/../layout/header.php';
             <div class="col-12 col-md-8 col-lg-6">
                 <div class="pf-card p-4 p-md-5">
                     <div class="text-center mb-4">
-                        <div class="pf-modul-judul justify-content-center mb-2">REGISTRASI</div>
                         <h1 class="pf-h1 fs-3">Buat Akun Donatur</h1>
                         <p class="pf-subjudul mb-0 mt-1">Bergabung bersama ribuan donatur untuk menyalurkan kebaikan</p>
                     </div>

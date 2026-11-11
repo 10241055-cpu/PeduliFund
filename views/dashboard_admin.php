@@ -7,7 +7,6 @@ $pengguna = penggunaAktif();
     <div class="pf-tray">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
             <div>
-                <div class="pf-modul-judul mb-1">PORTAL ADMIN</div>
                 <h1 class="pf-h1">Dashboard Admin</h1>
                 <p class="pf-subjudul mb-0 mt-1">
                     Selamat datang, <strong><?= e($pengguna['email'] ?? 'Admin') ?></strong>! Tinjau dan kelola verifikasi sistem.

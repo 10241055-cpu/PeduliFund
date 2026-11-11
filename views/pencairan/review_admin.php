@@ -14,7 +14,6 @@ $opsiFilter = [
     <div class="pf-tray">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div>
-                <div class="pf-modul-judul mb-1">PORTAL ADMIN</div>
                 <h1 class="pf-h1">Review Pencairan &amp; Audit LPJ</h1>
                 <p class="pf-subjudul mb-0 mt-1">Tinjau permohonan pencairan dana dan verifikasi laporan transparansi fundraiser.</p>
             </div>
