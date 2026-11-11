@@ -54,7 +54,6 @@ $pesan = ambilPesan();
                 <a class="btn-pf-outline py-1 px-3 fs-6" href="<?= e(BASE_URL) ?>/logout.php">Keluar</a>
             <?php else: ?>
                 <a class="btn-pf-cta py-1 px-3 fs-6" href="<?= e(BASE_URL) ?>/login.php">Masuk</a>
-                <a class="btn-pf-cta py-1 px-3 fs-6" href="<?= e(BASE_URL) ?>/signup.php">Daftar</a>
             <?php endif; ?>
         </div>
     </header>
