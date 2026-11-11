@@ -25,4 +25,8 @@ Aplikasi platform crowdfunding dan donasi berbasis campaign untuk mendukung peng
 4. Sesuaikan konfigurasi database lokal.
 
 ## Catatan
-Petunjuk instalasi dan penggunaan akan diperbarui sesuai perkembangan proyek.
+## Cara Menjalankan (XAMPP)
+
+1. Impor `database/schema.sql` lalu `database/sample_data.sql` ke MySQL (tabel: `pengguna`, `campaign`, `donasi`, `pencairan_dana`).
+2. Beri Apache hak tulis folder unggahan: `chmod -R a+wx uploads/`
+3. Buka `http://localhost/PeduliFund/` — akun contoh: `fundraiser@pedulifund.test`, `admin@pedulifund.test`, `donatur@pedulifund.test` (kata sandi `password`).

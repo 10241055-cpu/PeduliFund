@@ -2,6 +2,8 @@
 
 require_once 'app/bootstrap.php';
 
+wajibLogin('Fundraiser');
+
 $campaignEntity = new CampaignEntity($pdo);
 $pencairanEntity = new PencairanEntity($pdo);
 $userModel = new UserCredentialsDB($pdo);

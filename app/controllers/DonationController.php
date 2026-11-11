@@ -21,14 +21,14 @@ class DonationController
 
         if ($idCampaign <= 0) {
             setPesan('danger', 'Campaign tidak ditemukan.');
-            alihkan('dashboard_fundraiser.php');
+            alihkan($this->tujuanDashboard());
         }
 
         $campaign = $this->campaignEntity->ambilCampaignAktifById($idCampaign);
 
         if ($campaign === null) {
             setPesan('danger', 'Campaign tidak ditemukan atau belum aktif menerima donasi.');
-            alihkan('dashboard_fundraiser.php');
+            alihkan($this->tujuanDashboard());
         }
 
         $errors = $_SESSION['errors'] ?? [];
@@ -47,7 +47,7 @@ class DonationController
     public function prosesDonasi(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            alihkan('dashboard_fundraiser.php');
+            alihkan($this->tujuanDashboard());
         }
 
         verifikasiCsrf();
@@ -60,7 +60,7 @@ class DonationController
         $campaign = $this->campaignEntity->ambilCampaignAktifById($idCampaign);
         if ($campaign === null) {
             setPesan('danger', 'Campaign yang dituju tidak valid atau sudah tidak aktif.');
-            alihkan('dashboard_fundraiser.php');
+            alihkan($this->tujuanDashboard());
         }
 
         // Bersihkan pemisah ribuan jika ada
@@ -106,7 +106,7 @@ class DonationController
                 'success',
                 'Pembayaran simulasi berhasil! Terima kasih, donasi Anda sebesar ' . formatRupiah($nominal) . ' telah disalurkan ke campaign "' . $campaign['judul'] . '".'
             );
-            alihkan('dashboard_fundraiser.php');
+            alihkan($this->tujuanDashboard());
         } else {
             // Penanganan jika pembayaran simulasi gagal (SDD SEQ-003 alur alternatif)
             setPesan(
@@ -123,6 +123,14 @@ class DonationController
     private function prosesSimulasiPaymentGateway(string $skenario): string
     {
         return $skenario === 'Gagal' ? 'Gagal' : 'Berhasil';
+    }
+
+    /**
+     * Halaman landasan setelah aksi donasi mengikuti peran (dashboard_fundraiser dilindungi wajibLogin Fundraiser)
+     */
+    private function tujuanDashboard(): string
+    {
+        return peranPenggunaAktif() === 'Fundraiser' ? 'dashboard_fundraiser.php' : 'dashboard_donatur.php';
     }
 }
 

@@ -1,5 +1,8 @@
 <?php
 
+// Jam aplikasi selalu WIB agar perbandingan deadline/batas LPJ konsisten di semua komputer anggota
+date_default_timezone_set('Asia/Jakarta');
+
 // Cookie sesi tidak bisa dibaca JavaScript (httponly) dan tidak dikirim lintas-situs (Lax)
 session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
 session_start();
