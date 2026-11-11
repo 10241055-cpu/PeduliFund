@@ -71,7 +71,7 @@ class UserCredentialsDB
      */
     public function ambilBerdasarkanEmail(string $email): ?array
     {
-        $sql = "SELECT id_user, email, password, role FROM pengguna WHERE LOWER(email) = LOWER(:email) LIMIT 1";
+        $sql = "SELECT id_user, email, password, role, status_akun, suspend_sampai FROM pengguna WHERE LOWER(email) = LOWER(:email) LIMIT 1";
         $pernyataan = $this->pdo->prepare($sql);
         $pernyataan->execute([':email' => trim($email)]);
         $hasil = $pernyataan->fetch(PDO::FETCH_ASSOC);
@@ -84,7 +84,7 @@ class UserCredentialsDB
      */
     public function ambilBerdasarkanId(int $idUser): ?array
     {
-        $sql = "SELECT id_user, email, role FROM pengguna WHERE id_user = :id_user LIMIT 1";
+        $sql = "SELECT id_user, email, role, status_akun, suspend_sampai FROM pengguna WHERE id_user = :id_user LIMIT 1";
         $pernyataan = $this->pdo->prepare($sql);
         $pernyataan->execute([':id_user' => $idUser]);
         $hasil = $pernyataan->fetch(PDO::FETCH_ASSOC);
@@ -108,5 +108,34 @@ class UserCredentialsDB
             ':role'    => $roleBaru,
             ':id_user' => $idUser,
         ]);
+    }
+
+    /**
+     * Membekukan akun fundraiser hingga tanggal tertentu akibat keterlambatan LPJ (SDD 4.1.4)
+     */
+    public function bekukanAkun(int $idUser, string $suspendSampai): bool
+    {
+        $sql = "UPDATE pengguna
+                SET status_akun = 'Dibekukan', suspend_sampai = :suspend_sampai
+                WHERE id_user = :id_user";
+        $pernyataan = $this->pdo->prepare($sql);
+
+        return $pernyataan->execute([
+            ':suspend_sampai' => $suspendSampai,
+            ':id_user'        => $idUser,
+        ]);
+    }
+
+    /**
+     * Mengaktifkan kembali akun pengguna setelah masa pembekuan dan kewajiban LPJ terpenuhi
+     */
+    public function aktifkanAkun(int $idUser): bool
+    {
+        $sql = "UPDATE pengguna
+                SET status_akun = 'Aktif', suspend_sampai = NULL
+                WHERE id_user = :id_user";
+        $pernyataan = $this->pdo->prepare($sql);
+
+        return $pernyataan->execute([':id_user' => $idUser]);
     }
 }

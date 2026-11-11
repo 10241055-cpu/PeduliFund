@@ -5,10 +5,20 @@
 class CampaignController
 {
     private CampaignEntity $campaignEntity;
+    private ?PencairanEntity $pencairanEntity;
+    private ?UserCredentialsDB $userModel;
+    private ?PencairanController $pencairanController;
 
-    public function __construct(CampaignEntity $campaignEntity)
-    {
+    public function __construct(
+        CampaignEntity $campaignEntity,
+        ?PencairanEntity $pencairanEntity = null,
+        ?UserCredentialsDB $userModel = null,
+        ?PencairanController $pencairanController = null
+    ) {
         $this->campaignEntity = $campaignEntity;
+        $this->pencairanEntity = $pencairanEntity;
+        $this->userModel = $userModel;
+        $this->pencairanController = $pencairanController;
     }
 
     /**
@@ -17,6 +27,12 @@ class CampaignController
     public function tampilkanDashboard(): void
     {
         $idFundraiser = idPenggunaAktif();
+        $hariIni = date('Y-m-d');
+
+        $this->campaignEntity->tutupCampaignKedaluwarsa($idFundraiser, $hariIni);
+        if ($this->pencairanController !== null) {
+            $this->pencairanController->periksaDanTerapkanSanksiLpj($hariIni);
+        }
 
         $cari = trim((string) ($_GET['cari'] ?? ''));
         $filterStatus = trim((string) ($_GET['status'] ?? ''));
@@ -28,6 +44,15 @@ class CampaignController
 
         $ringkasan = $this->campaignEntity->ambilRingkasanFundraiser($idFundraiser);
         $daftarCampaign = $this->campaignEntity->ambilDaftarByFundraiser($idFundraiser, $cari, $filterStatus);
+        $akunFundraiser = $this->userModel !== null ? $this->userModel->ambilBerdasarkanId($idFundraiser) : null;
+
+        $daftarIdCampaign = array_map(static fn (array $c): int => (int) $c['id_campaign'], $daftarCampaign);
+        $pencairanPerCampaign = $this->pencairanEntity !== null
+            ? $this->pencairanEntity->ambilTerbaruByDaftarCampaign($daftarIdCampaign)
+            : [];
+        $tagihanLpj = $this->pencairanEntity !== null
+            ? $this->pencairanEntity->ambilTagihanLpjFundraiser($idFundraiser)
+            : [];
 
         require __DIR__ . '/../../views/dashboard_fundraiser.php';
     }
@@ -37,6 +62,8 @@ class CampaignController
      */
     public function tampilkanFormCampaign(): void
     {
+        $this->pastikanBolehMembuatCampaign();
+
         $errors = $_SESSION['errors'] ?? [];
         $old = $_SESSION['old'] ?? [];
         unset($_SESSION['errors'], $_SESSION['old']);
@@ -56,6 +83,7 @@ class CampaignController
         }
 
         verifikasiCsrf();
+        $this->pastikanBolehMembuatCampaign();
 
         $judul = trim((string) ($_POST['judul'] ?? ''));
         $jenis = trim((string) ($_POST['jenis'] ?? ''));
@@ -207,6 +235,11 @@ class CampaignController
             alihkan('dashboard_fundraiser.php');
         }
 
+        if ($this->pencairanEntity !== null && $this->pencairanEntity->sudahDicairkan($idCampaign)) {
+            setPesan('danger', 'Campaign yang dananya sudah dicairkan tidak dapat dihapus demi jejak audit LPJ.');
+            alihkan('dashboard_fundraiser.php');
+        }
+
         try {
             $this->campaignEntity->hapusCampaign($idCampaign, idPenggunaAktif());
 
@@ -222,5 +255,32 @@ class CampaignController
         }
 
         alihkan('dashboard_fundraiser.php');
+    }
+
+    /**
+     * Menolak pembuatan campaign baru bila akun dibekukan atau ada LPJ pencairan belum terverifikasi (SDD 3.1.2 & 3.1.4)
+     */
+    private function pastikanBolehMembuatCampaign(): void
+    {
+        if ($this->pencairanController !== null) {
+            $this->pencairanController->periksaDanTerapkanSanksiLpj();
+        }
+
+        $idFundraiser = idPenggunaAktif();
+        if ($this->userModel !== null) {
+            $akun = $this->userModel->ambilBerdasarkanId($idFundraiser);
+            if ($akun !== null && ($akun['status_akun'] ?? 'Aktif') === 'Dibekukan') {
+                $infoTanggal = !empty($akun['suspend_sampai'])
+                    ? ' hingga ' . formatTanggal($akun['suspend_sampai'])
+                    : '';
+                setPesan('danger', 'Akun Anda sedang dibekukan' . $infoTanggal . ' karena keterlambatan LPJ dan belum dapat membuat campaign baru.');
+                alihkan('dashboard_fundraiser.php');
+            }
+        }
+
+        if ($this->pencairanEntity !== null && $this->pencairanEntity->hitungLpjBelumTerverifikasiByFundraiser($idFundraiser) > 0) {
+            setPesan('danger', 'Selesaikan unggah dan verifikasi LPJ pencairan sebelumnya terlebih dahulu sebelum membuat campaign baru.');
+            alihkan('dashboard_fundraiser.php');
+        }
     }
 }
