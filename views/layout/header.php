@@ -39,7 +39,6 @@ $pesan = ambilPesan();
                     <a class="pf-menu-item <?= (isset($judulHalaman) && $judulHalaman === 'Beranda') ? 'pf-menu-item-aktif' : '' ?>" href="<?= e(BASE_URL) ?>/index.php">Beranda</a>
                     <a class="pf-menu-item" href="<?= e(BASE_URL) ?>/index.php#tentang">Tentang</a>
                     <a class="pf-menu-item" href="<?= e(BASE_URL) ?>/index.php#cara-kerja">Cara Kerja</a>
-                    <a class="pf-menu-item <?= (isset($judulHalaman) && strpos($judulHalaman, 'Masuk') !== false) ? 'pf-menu-item-aktif' : '' ?>" href="<?= e(BASE_URL) ?>/login.php">Masuk</a>
                 <?php endif; ?>
             </nav>
 
@@ -54,6 +53,7 @@ $pesan = ambilPesan();
                 </div>
                 <a class="btn-pf-outline py-1 px-3 fs-6" href="<?= e(BASE_URL) ?>/logout.php">Keluar</a>
             <?php else: ?>
+                <a class="btn-pf-cta py-1 px-3 fs-6" href="<?= e(BASE_URL) ?>/login.php">Masuk</a>
                 <a class="btn-pf-cta py-1 px-3 fs-6" href="<?= e(BASE_URL) ?>/signup.php">Daftar</a>
             <?php endif; ?>
         </div>
