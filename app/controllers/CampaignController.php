@@ -445,10 +445,7 @@ class CampaignController
      */
     public function unduhDokumenCampaign(): void
     {
-        $this->layaniUnduhDokumen(
-            static fn (): ?array => null,
-            'dokumen_campaign'
-        );
+        $this->layaniUnduhDokumen('dokumen_campaign');
     }
 
     /**
@@ -456,16 +453,13 @@ class CampaignController
      */
     public function unduhDokumenVerifikasi(): void
     {
-        $this->layaniUnduhDokumen(
-            fn (int $id): ?array => $this->verifikasiEntity !== null ? $this->verifikasiEntity->ambilById($id) : null,
-            'dokumen_verifikasi'
-        );
+        $this->layaniUnduhDokumen('dokumen_verifikasi');
     }
 
     /**
      * Melayani berkas pratinjau untuk admin: kampanye (dokumen_campaign) atau verifikasi akun
      */
-    private function layaniUnduhDokumen(callable $pencariBerkas, string $jenisBerkas): void
+    private function layaniUnduhDokumen(string $jenisBerkas): void
     {
         if (peranPenggunaAktif() !== 'Admin') {
             http_response_code(403);
@@ -479,7 +473,9 @@ class CampaignController
             $kolomPendukung = 'gambar_campaign';
         } else {
             $id = (int) ($_GET['id_verifikasi'] ?? 0);
-            $baris = $pencariBerkas($id);
+            $baris = $id > 0 && $this->verifikasiEntity !== null
+                ? $this->verifikasiEntity->ambilById($id)
+                : null;
             $kolomDokumen = 'dokumen_verifikasi';
             $kolomPendukung = 'dokumen_pendukung';
         }
@@ -517,6 +513,8 @@ class CampaignController
             exit('Tipe berkas tidak diizinkan untuk ditampilkan.');
         }
 
+        // Berkas berisi data pribadi: jangan biarkan peramban/proxy menyimpannya
+        header('Cache-Control: private, no-store');
         header('Content-Type: ' . $mime);
         header('Content-Length: ' . filesize($lokasiFile));
         header('Content-Disposition: inline; filename="' . $namaFile . '"');
