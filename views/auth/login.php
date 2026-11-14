@@ -58,7 +58,6 @@ require __DIR__ . '/../layout/header.php';
                     <div class="pf-akun-uji text-center mt-4 pt-3 border-top">
                         <p class="pf-subjudul mb-2">Akun uji data sampel</p>
                         <div class="d-flex flex-wrap justify-content-center gap-2" id="akun-uji">
-                            <a class="btn-pf-outline" href="<?= e(BASE_URL) ?>/index.php">Guest</a>
                             <button type="button" class="btn-pf-outline" data-email="admin@pedulifund.test">Admin</button>
                             <button type="button" class="btn-pf-outline" data-email="fundraiser@pedulifund.test">Fundraiser</button>
                             <button type="button" class="btn-pf-outline" data-email="donatur@pedulifund.test">Donatur</button>
