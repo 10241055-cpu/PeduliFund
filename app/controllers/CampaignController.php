@@ -307,6 +307,12 @@ class CampaignController
             alihkan('dashboard_fundraiser.php');
         }
 
+        // donasi memakai ON DELETE CASCADE: tanpa gerbang ini seluruh riwayat donasi ikut terhapus
+        if ($this->campaignEntity->punyaDonasiTercatat($idCampaign)) {
+            setPesan('danger', 'Campaign yang sudah menerima donasi tidak dapat dihapus demi jejak audit donatur.');
+            alihkan('dashboard_fundraiser.php');
+        }
+
         try {
             $this->campaignEntity->hapusCampaign($idCampaign, idPenggunaAktif());
 

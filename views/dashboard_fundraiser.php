@@ -196,7 +196,7 @@ $bisaBuatCampaign = !$akunDibekukan && !$adaTagihanLpj;
                                                 </a>
                                             <?php endif; ?>
 
-                                            <?php if (!$sudahDisetujui): ?>
+                                            <?php if (!$sudahDisetujui && (int) ($campaign['jumlah_donasi'] ?? 0) === 0): ?>
                                                 <form method="post" action="<?= e(BASE_URL) ?>/hapus_campaign.php" onsubmit="return confirm('Hapus campaign ini?');" class="m-0">
                                                     <input type="hidden" name="csrf_token" value="<?= e(tokenCsrf()) ?>">
                                                     <input type="hidden" name="id_campaign" value="<?= e((string) $idCampaign) ?>">

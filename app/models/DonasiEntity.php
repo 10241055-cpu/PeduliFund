@@ -5,6 +5,9 @@ class DonasiEntity
 {
     public const DAFTAR_METODE = ['Transfer Bank', 'EWallet', 'QRIS'];
     public const DAFTAR_STATUS = ['Berhasil', 'Gagal'];
+    // Batas atas menjaga dana_terkumpul campaign (DECIMAL(15,2)) tidak overflow
+    public const NOMINAL_MINIMAL = 10000;
+    public const NOMINAL_MAKSIMAL = 1000000000;
 
     private PDO $pdo;
 
