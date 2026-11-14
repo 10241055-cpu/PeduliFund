@@ -17,7 +17,7 @@ $pesan = ambilPesan();
         <a class="pf-logo" href="<?= e(BASE_URL) ?>/index.php" aria-label="Beranda PeduliFund">
             <span class="pf-wordmark">Peduli<span class="pf-fund">Fund</span><span class="pf-titik">.</span></span>
         </a>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
             <nav class="pf-menu" aria-label="Menu utama">
                 <?php $menuCampaignAktif = isset($judulHalaman) && in_array($judulHalaman, ['Daftar Campaign', 'Detail Campaign'], true); ?>
                 <a class="pf-menu-item <?= $menuCampaignAktif ? 'pf-menu-item-aktif' : '' ?>" href="<?= e(BASE_URL) ?>/daftar_campaign.php">Campaign</a>
