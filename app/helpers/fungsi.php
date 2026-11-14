@@ -120,6 +120,32 @@ function bolehAjukanUlang(?string $tanggalKeputusan, string $hariIni): bool
 }
 
 /**
+ * Dashboard tujuan sesuai peran; dipakai bersama oleh pengalihan login dan pengalihan setelah donasi
+ */
+function dashboardUntukPeran(?string $peran): string
+{
+    return match ($peran) {
+        'Fundraiser' => 'dashboard_fundraiser.php',
+        'Admin'      => 'dashboard_admin.php',
+        default      => 'dashboard_donatur.php',
+    };
+}
+
+/**
+ * Hanya pemohon baru atau yang ditolak lebih dari 14 hari lalu yang boleh mengajukan verifikasi akun;
+ * pengajuan Menunggu/Valid tidak boleh ditumpuk dengan pengajuan baru
+ */
+function bolehAjukanVerifikasi(?array $pengajuan, string $hariIni): bool
+{
+    if ($pengajuan === null) {
+        return true;
+    }
+
+    return $pengajuan['status_dokumen'] === 'Ditolak'
+        && bolehAjukanUlang($pengajuan['tanggal_keputusan'] ?? null, $hariIni);
+}
+
+/**
  * Ambil pesan flash lalu hapus dari session
  */
 function ambilPesan(): ?array

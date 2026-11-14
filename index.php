@@ -5,14 +5,7 @@
 require_once __DIR__ . '/app/bootstrap.php';
 
 if (sudahLogin()) {
-    $peran = peranPenggunaAktif();
-    if ($peran === 'Donatur') {
-        alihkan('dashboard_donatur.php');
-    } elseif ($peran === 'Admin') {
-        alihkan('dashboard_admin.php');
-    } else {
-        alihkan('dashboard_fundraiser.php');
-    }
+    alihkan(dashboardUntukPeran(peranPenggunaAktif()));
 } else {
     require __DIR__ . '/views/beranda.php';
 }

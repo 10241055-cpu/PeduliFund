@@ -73,6 +73,14 @@ $cek(!bolehAjukanUlang($tanggalKeputusan, (new DateTimeImmutable($tanggalKeputus
 $cek(bolehAjukanUlang($tanggalKeputusan, (new DateTimeImmutable($tanggalKeputusan))->modify('+15 days')->format('Y-m-d')), 'Ajukan ulang 15 hari setelah tolak sudah terbuka');
 $cek(bolehAjukanUlang(null, date('Y-m-d')), 'Pemohon tanpa riwayat penolakan boleh mengajukan');
 
+// 7b. Gerbang pengajuan ulang: Menunggu dan Valid tidak boleh mengajukan lagi
+//     (hanya pemohon baru atau yang Ditolak lebih dari 14 hari lalu)
+$cek(bolehAjukanVerifikasi(null, date('Y-m-d')), 'Pemohon baru boleh mengajukan verifikasi');
+$cek(!bolehAjukanVerifikasi(['status_dokumen' => 'Menunggu', 'tanggal_keputusan' => null], date('Y-m-d')), 'Pengajuan Menunggu tidak boleh ditumpuk pengajuan baru');
+$cek(!bolehAjukanVerifikasi(['status_dokumen' => 'Valid', 'tanggal_keputusan' => date('Y-m-d')], date('Y-m-d')), 'Akun yang sudah Valid tidak boleh mengajukan verifikasi lagi');
+$cek(bolehAjukanVerifikasi(['status_dokumen' => 'Ditolak', 'tanggal_keputusan' => (new DateTimeImmutable('-15 days'))->format('Y-m-d')], date('Y-m-d')), 'Pengajuan Ditolak lebih dari 14 hari lalu boleh diulang');
+$cek(!bolehAjukanVerifikasi(['status_dokumen' => 'Ditolak', 'tanggal_keputusan' => (new DateTimeImmutable('-3 days'))->format('Y-m-d')], date('Y-m-d')), 'Pengajuan Ditolak 3 hari lalu masih terkunci 14 hari');
+
 // 8. Setujui pengajuan lain (baris Ditolak tidak bisa disetujui karena hanya Menunggu)
 $idPengajuan2 = $verifikasiEntity->buatPengajuan([
     'id_user'            => $idUserUji,

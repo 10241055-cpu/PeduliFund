@@ -56,6 +56,16 @@ ujiDaftar('Detail publik menampilkan campaign Selesai (3) agar bisa diaudit tran
 ujiDaftar('Detail publik menolak campaign Pending (2)',
     $campaignEntity->ambilCampaignPublikById(2) === null);
 
+// Status campaign baru jadi Selesai saat fundraiser membuka dashboard, jadi donasi tidak boleh
+// bergantung pada status saja: deadline yang sudah lewat harus ditolak di sini juga
+$deadlineAsli = (string) $pdo->query('SELECT deadline FROM campaign WHERE id_campaign = 1')->fetchColumn();
+$pdo->exec("UPDATE campaign SET status_campaign = 'Aktif', deadline = DATE_SUB(CURDATE(), INTERVAL 3 DAY) WHERE id_campaign = 1");
+ujiDaftar('Campaign Aktif yang deadline-nya lewat ditolak sebagai tujuan donasi',
+    $campaignEntity->ambilCampaignAktifById(1) === null);
+$pdo->prepare('UPDATE campaign SET deadline = ? WHERE id_campaign = 1')->execute([$deadlineAsli]);
+ujiDaftar('Campaign Aktif yang belum deadline tetap boleh didonasi',
+    $campaignEntity->ambilCampaignAktifById(1) !== null);
+
 $terbaru = $donasiEntity->ambilDonaturTerbaruByCampaign(1);
 ujiDaftar('Donatur terbaru campaign 1 berjumlah 2 (donasi Gagal tidak ikut)', count($terbaru) === 2);
 ujiDaftar('Donatur terbaru tersortir terbaru dulu (QRIS 2.5 jt di posisi pertama)',
