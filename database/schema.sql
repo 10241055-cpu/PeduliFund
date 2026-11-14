@@ -52,6 +52,8 @@ CREATE TABLE IF NOT EXISTS campaign (
     status_campaign ENUM('Pending', 'Aktif', 'Ditolak', 'Selesai') DEFAULT 'Pending',
     deskripsi TEXT NOT NULL,
     gambar_campaign VARCHAR(255) NULL,
+    -- Di luar kamus SDD: wireframe UI-013 menuntut alasan penolakan wajib tersimpan (mintaRevisiFormulir)
+    alasan_penolakan TEXT NULL,
     CONSTRAINT fk_campaign_pengguna
         FOREIGN KEY (id_fundraiser) REFERENCES pengguna (id_user)
         ON DELETE CASCADE ON UPDATE CASCADE

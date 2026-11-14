@@ -10,6 +10,7 @@ $pencairanEntity = new PencairanEntity($pdo);
 $pencairanController = new PencairanController($pencairanEntity, $campaignEntity, new UserCredentialsDB($pdo), $pdo);
 $pencairanController->periksaDanTerapkanSanksiLpj();
 
+$jumlahAkunMenunggu = (new VerifikasiFundraiserEntity($pdo))->hitungMenunggu();
 $jumlahCampaignMenunggu = $campaignEntity->hitungCampaignMenunggu();
 $ringkasanPencairan = $pencairanEntity->ambilRingkasanAdmin();
 
