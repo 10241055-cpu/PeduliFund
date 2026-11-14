@@ -138,4 +138,33 @@ class UserCredentialsDB
 
         return $pernyataan->execute([':id_user' => $idUser]);
     }
+
+    /**
+     * Menyimpan selfie hasil verifikasi wajah (UI-007); kolom terisi berarti sudah lolos gerbang
+     */
+    public function simpanFotoWajah(int $idUser, string $namaFile): bool
+    {
+        $pernyataan = $this->pdo->prepare(
+            'UPDATE pengguna SET foto_wajah = :foto_wajah WHERE id_user = :id_user'
+        );
+
+        return $pernyataan->execute([
+            ':foto_wajah' => $namaFile,
+            ':id_user'    => $idUser,
+        ]);
+    }
+
+    /**
+     * Memeriksa apakah fundraiser masih perlu melewati gerbang verifikasi wajah (UI-007)
+     */
+    public function butuhVerifikasiWajah(int $idUser): bool
+    {
+        $pernyataan = $this->pdo->prepare(
+            'SELECT foto_wajah FROM pengguna WHERE id_user = :id_user LIMIT 1'
+        );
+        $pernyataan->execute([':id_user' => $idUser]);
+        $fotoWajah = $pernyataan->fetchColumn();
+
+        return $fotoWajah === false || $fotoWajah === null || trim((string) $fotoWajah) === '';
+    }
 }

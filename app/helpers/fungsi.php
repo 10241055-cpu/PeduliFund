@@ -106,6 +106,20 @@ function setPesan($jenis, $teks): void
 }
 
 /**
+ * Aturan wireframe UI-008: pengajuan ulang setelah penolakan baru boleh dilakukan 14 hari kemudian
+ */
+function bolehAjukanUlang(?string $tanggalKeputusan, string $hariIni): bool
+{
+    if ($tanggalKeputusan === null || trim($tanggalKeputusan) === '') {
+        return true;
+    }
+
+    $batasBuka = (new DateTimeImmutable($tanggalKeputusan))->modify('+14 days')->format('Y-m-d');
+
+    return $hariIni >= $batasBuka;
+}
+
+/**
  * Ambil pesan flash lalu hapus dari session
  */
 function ambilPesan(): ?array
