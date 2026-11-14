@@ -7,15 +7,25 @@ USE pedulifund;
 -- 1. Fundraiser: fundraiser@pedulifund.test
 -- 2. Admin:      admin@pedulifund.test
 -- 3. Donatur:    donatur@pedulifund.test
-INSERT INTO pengguna (id_user, email, password, role)
+INSERT INTO pengguna (id_user, email, password, role, status_akun, suspend_sampai, foto_wajah)
 VALUES
-(1, 'fundraiser@pedulifund.test', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Fundraiser'),
-(2, 'admin@pedulifund.test', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin'),
-(3, 'donatur@pedulifund.test', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Donatur')
+(1, 'fundraiser@pedulifund.test', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Fundraiser', 'Aktif', NULL, 'contoh_wajah.jpg'),
+(2, 'admin@pedulifund.test', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin', 'Aktif', NULL, NULL),
+(3, 'donatur@pedulifund.test', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Donatur', 'Aktif', NULL, NULL)
 ON DUPLICATE KEY UPDATE
     email = VALUES(email),
     password = VALUES(password),
-    role = VALUES(role);
+    role = VALUES(role),
+    status_akun = VALUES(status_akun),
+    suspend_sampai = VALUES(suspend_sampai),
+    foto_wajah = VALUES(foto_wajah);
+
+-- Pengajuan verifikasi akun contoh untuk donatur 3 agar admin dapat mencoba UI-012 (Setujui/Tolak)
+INSERT INTO verifikasi_fundraiser (id_verifikasi, id_user, jenis_fundraiser, nama_lengkap, nomor_identitas, nomor_telepon, dokumen_verifikasi, dokumen_pendukung, status_dokumen)
+VALUES
+(1, 3, 'Individu', 'Budi Donatur', '3171234567890001', '081234567890', 'contoh_dokumen.pdf', NULL, 'Menunggu')
+ON DUPLICATE KEY UPDATE
+    status_dokumen = VALUES(status_dokumen);
 
 -- Data contoh 3 campaign milik id_fundraiser 1 (dokumen_campaign: 'contoh_dokumen.pdf')
 INSERT INTO campaign (id_campaign, id_fundraiser, judul, jenis, target_dana, dana_terkumpul, deadline, dokumen_campaign, status_campaign, deskripsi, gambar_campaign)

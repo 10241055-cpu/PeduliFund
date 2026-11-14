@@ -15,3 +15,7 @@ uploads/gambar_campaign/*
 uploads/dokumen_lpj/*
 !uploads/dokumen_lpj/.gitkeep
 !uploads/dokumen_lpj/.htaccess
+uploads/dokumen_verifikasi/*
+!uploads/dokumen_verifikasi/.gitkeep
+!uploads/dokumen_verifikasi/.htaccess
+!uploads/dokumen_verifikasi/contoh_wajah.jpg
