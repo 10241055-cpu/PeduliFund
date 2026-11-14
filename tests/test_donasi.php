@@ -65,6 +65,11 @@ $cek(dashboardUntukPeran('Fundraiser') === 'dashboard_fundraiser.php', 'Fundrais
 $cek(dashboardUntukPeran('Donatur') === 'dashboard_donatur.php', 'Donatur diarahkan ke dashboard donatur setelah beraksi');
 $cek(dashboardUntukPeran(null) === 'dashboard_donatur.php', 'Peran kosong jatuh ke dashboard donatur (tidak fatal)');
 
+// 7. Batas nominal menjaga dana_terkumpul DECIMAL(15,2) tetap muat: tanpa batas atas,
+//    INSERT donasi berhasil tetapi UPDATE progres gagal sehingga dana tidak pernah masuk
+$cek(DonasiEntity::NOMINAL_MINIMAL === 10000, 'Batas minimal donasi Rp 10.000 sesuai aturan');
+$cek(DonasiEntity::NOMINAL_MAKSIMAL === 1000000000, 'Batas maksimal donasi Rp 1.000.000.000 mencegah overflow kolom dana');
+
 echo "--------------------------------------------------------" . PHP_EOL;
 echo $jumlahGagal === 0 ? 'Semua pengujian fitur donasi LULUS.' : $jumlahGagal . ' pengujian GAGAL.';
 echo PHP_EOL;

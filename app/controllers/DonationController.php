@@ -5,11 +5,13 @@ class DonationController
 {
     private DonasiEntity $donasiEntity;
     private CampaignEntity $campaignEntity;
+    private ?PDO $pdo;
 
-    public function __construct(DonasiEntity $donasiEntity, CampaignEntity $campaignEntity)
+    public function __construct(DonasiEntity $donasiEntity, CampaignEntity $campaignEntity, ?PDO $pdo = null)
     {
         $this->donasiEntity = $donasiEntity;
         $this->campaignEntity = $campaignEntity;
+        $this->pdo = $pdo;
     }
 
     /**
@@ -110,8 +112,10 @@ class DonationController
         $nominal = is_numeric($nominalBersih) ? (float) $nominalBersih : 0.0;
 
         $errors = [];
-        if ($nominal < 10000) {
-            $errors[] = 'Nominal donasi minimal adalah Rp 10.000.';
+        if ($nominal < DonasiEntity::NOMINAL_MINIMAL) {
+            $errors[] = 'Nominal donasi minimal adalah ' . formatRupiah(DonasiEntity::NOMINAL_MINIMAL) . '.';
+        } elseif ($nominal > DonasiEntity::NOMINAL_MAKSIMAL) {
+            $errors[] = 'Nominal donasi maksimal adalah ' . formatRupiah(DonasiEntity::NOMINAL_MAKSIMAL) . '.';
         }
 
         if (!in_array($metodePembayaran, DonasiEntity::DAFTAR_METODE, true)) {
@@ -131,19 +135,40 @@ class DonationController
         // Eksekusi simulasi payment gateway buatan tim (SDD Bab 1.3)
         $statusPembayaran = $this->prosesSimulasiPaymentGateway($skenarioSimulasi);
 
-        // Catat seluruh riwayat transaksi ke DonasiEntity (baik berhasil maupun gagal)
-        $this->donasiEntity->catatDonasi([
-            'id_campaign'       => $idCampaign,
-            'id_donatur'        => idPenggunaAktif(),
-            'nominal'           => $nominal,
-            'metode_pembayaran' => $metodePembayaran,
-            'status_pembayaran' => $statusPembayaran,
-        ]);
+        // Riwayat donasi dan progres dana harus tersimpan bersama; kalau salah satu gagal,
+        // jangan sampai ada donasi tercatat tanpa dana campaign bertambah
+        $kelolaTransaksi = $this->pdo !== null && !$this->pdo->inTransaction();
+        try {
+            if ($kelolaTransaksi) {
+                $this->pdo->beginTransaction();
+            }
+
+            // Catat seluruh riwayat transaksi ke DonasiEntity (baik berhasil maupun gagal)
+            $this->donasiEntity->catatDonasi([
+                'id_campaign'       => $idCampaign,
+                'id_donatur'        => idPenggunaAktif(),
+                'nominal'           => $nominal,
+                'metode_pembayaran' => $metodePembayaran,
+                'status_pembayaran' => $statusPembayaran,
+            ]);
+
+            if ($statusPembayaran === 'Berhasil') {
+                // Perbarui akumulasi dana terkumpul pada CampaignEntity (SDD SEQ-003)
+                $this->campaignEntity->perbaruiProgresDana($idCampaign, $nominal);
+            }
+
+            if ($kelolaTransaksi) {
+                $this->pdo->commit();
+            }
+        } catch (PDOException $e) {
+            if ($kelolaTransaksi && $this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            setPesan('danger', 'Donasi gagal dicatat. Tidak ada dana yang berubah, silakan coba kembali.');
+            alihkan('donasi.php?id=' . $idCampaign);
+        }
 
         if ($statusPembayaran === 'Berhasil') {
-            // Perbarui akumulasi dana terkumpul pada CampaignEntity (SDD SEQ-003)
-            $this->campaignEntity->perbaruiProgresDana($idCampaign, $nominal);
-
             setPesan(
                 'success',
                 'Pembayaran simulasi berhasil! Terima kasih, donasi Anda sebesar ' . formatRupiah($nominal) . ' telah disalurkan ke campaign "' . $campaign['judul'] . '".'

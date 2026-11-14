@@ -217,6 +217,17 @@ function wajibLogin(?string $roleDibutuhkan = null): void
 }
 
 /**
+ * Gerbang UI-007: fundraiser tanpa foto wajah diarahkan ke halaman verifikasi wajah.
+ * Dipanggil di setiap entri fundraiser agar tidak bisa dilewati lewat URL langsung.
+ */
+function wajibVerifikasiWajah(PDO $pdo): void
+{
+    if ((new UserCredentialsDB($pdo))->butuhVerifikasiWajah(idPenggunaAktif())) {
+        alihkan('verifikasi_wajah.php');
+    }
+}
+
+/**
  * Token anti-CSRF untuk semua form POST (dibuat sekali per sesi)
  */
 function tokenCsrf(): string

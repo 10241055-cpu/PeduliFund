@@ -48,23 +48,26 @@ class CampaignEntity
      */
     public function ambilDaftarByFundraiser(int $idFundraiser, string $cari = '', string $statusFilter = ''): array
     {
-        $sql = 'SELECT * FROM campaign WHERE id_fundraiser = :id_fundraiser';
+        // jumlah_donasi dipakai view untuk menyembunyikan tombol Hapus pada campaign yang punya riwayat donasi
+        $sql = 'SELECT c.*,
+                       (SELECT COUNT(*) FROM donasi d WHERE d.id_campaign = c.id_campaign) AS jumlah_donasi
+                FROM campaign c WHERE c.id_fundraiser = :id_fundraiser';
         $parameter = [':id_fundraiser' => $idFundraiser];
 
         $cari = trim($cari);
         if ($cari !== '') {
-            $sql .= ' AND judul LIKE :cari';
+            $sql .= ' AND c.judul LIKE :cari';
             // % dan _ punya makna khusus di LIKE; jadikan literal agar hasil cari presisi
             $parameter[':cari'] = '%' . addcslashes($cari, '%_\\') . '%';
         }
 
         $statusFilter = trim($statusFilter);
         if ($statusFilter !== '' && in_array($statusFilter, self::DAFTAR_STATUS, true)) {
-            $sql .= ' AND status_campaign = :status_campaign';
+            $sql .= ' AND c.status_campaign = :status_campaign';
             $parameter[':status_campaign'] = $statusFilter;
         }
 
-        $sql .= ' ORDER BY id_campaign DESC';
+        $sql .= ' ORDER BY c.id_campaign DESC';
         $pernyataan = $this->pdo->prepare($sql);
         $pernyataan->execute($parameter);
 
@@ -368,6 +371,20 @@ class CampaignEntity
         $pernyataan->execute([':id_fundraiser' => $idFundraiser]);
 
         return $pernyataan->rowCount();
+    }
+
+    /**
+     * Memeriksa apakah campaign sudah punya baris donasi (berhasil maupun gagal).
+     * Donasi memakai ON DELETE CASCADE, jadi menghapus campaign akan menghapus jejak auditnya.
+     */
+    public function punyaDonasiTercatat(int $idCampaign): bool
+    {
+        $pernyataan = $this->pdo->prepare(
+            'SELECT COUNT(*) FROM donasi WHERE id_campaign = :id_campaign'
+        );
+        $pernyataan->execute([':id_campaign' => $idCampaign]);
+
+        return ((int) $pernyataan->fetchColumn()) > 0;
     }
 
     /**

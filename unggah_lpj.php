@@ -4,6 +4,7 @@
 require_once 'app/bootstrap.php';
 
 wajibLogin('Fundraiser');
+wajibVerifikasiWajah($pdo);
 
 $controller = new PencairanController(
     new PencairanEntity($pdo),

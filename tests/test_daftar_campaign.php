@@ -66,6 +66,16 @@ $pdo->prepare('UPDATE campaign SET deadline = ? WHERE id_campaign = 1')->execute
 ujiDaftar('Campaign Aktif yang belum deadline tetap boleh didonasi',
     $campaignEntity->ambilCampaignAktifById(1) !== null);
 
+// Donasi memakai ON DELETE CASCADE: campaign yang sudah punya riwayat donasi tidak boleh
+// dihapus, kalau tidak seluruh jejak audit donatur ikut hilang
+ujiDaftar('Campaign yang punya donasi tercatat ditandai tidak boleh dihapus',
+    $campaignEntity->punyaDonasiTercatat(1));
+$pdo->exec("INSERT INTO campaign (id_fundraiser, judul, jenis, deskripsi, target_dana, deadline, dokumen_campaign)
+            VALUES (1, 'Campaign Uji Hapus', 'Sosial', 'uji', 1000000, DATE_ADD(CURDATE(), INTERVAL 10 DAY), 'uji.pdf')");
+$idTanpaDonasi = (int) $pdo->lastInsertId();
+ujiDaftar('Campaign tanpa donasi tetap boleh dihapus', !$campaignEntity->punyaDonasiTercatat($idTanpaDonasi));
+$pdo->prepare('DELETE FROM campaign WHERE id_campaign = ?')->execute([$idTanpaDonasi]);
+
 $terbaru = $donasiEntity->ambilDonaturTerbaruByCampaign(1);
 ujiDaftar('Donatur terbaru campaign 1 berjumlah 2 (donasi Gagal tidak ikut)', count($terbaru) === 2);
 ujiDaftar('Donatur terbaru tersortir terbaru dulu (QRIS 2.5 jt di posisi pertama)',
