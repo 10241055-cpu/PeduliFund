@@ -10,4 +10,5 @@ define('UKURAN_MAKS_UPLOAD', 2097152);
 define('DIR_UPLOAD_DOKUMEN', dirname(__DIR__) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'dokumen_campaign' . DIRECTORY_SEPARATOR);
 define('DIR_UPLOAD_GAMBAR', dirname(__DIR__) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'gambar_campaign' . DIRECTORY_SEPARATOR);
 define('DIR_UPLOAD_LPJ', dirname(__DIR__) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'dokumen_lpj' . DIRECTORY_SEPARATOR);
+define('DIR_UPLOAD_VERIFIKASI', dirname(__DIR__) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'dokumen_verifikasi' . DIRECTORY_SEPARATOR);
 define('URL_UPLOAD_GAMBAR', BASE_URL . '/uploads/gambar_campaign/');

@@ -4,10 +4,12 @@
 class AuthController
 {
     private UserCredentialsDB $modelPengguna;
+    private ?VerifikasiFundraiserEntity $verifikasiEntity;
 
-    public function __construct(UserCredentialsDB $modelPengguna)
+    public function __construct(UserCredentialsDB $modelPengguna, ?VerifikasiFundraiserEntity $verifikasiEntity = null)
     {
         $this->modelPengguna = $modelPengguna;
+        $this->verifikasiEntity = $verifikasiEntity;
     }
 
     /**
@@ -173,5 +175,198 @@ class AuthController
         } else {
             alihkan('dashboard_donatur.php');
         }
+    }
+
+    /**
+     * Menampilkan form verifikasi akun fundraiser (UI-008) beserta status pengajuan terakhir
+     */
+    public function tampilkanPengajuanVerifikasi(): void
+    {
+        wajibLogin();
+
+        $judulHalaman = 'Verifikasi Akun Fundraiser';
+        $pengajuan = $this->verifikasiEntity !== null
+            ? $this->verifikasiEntity->ambilTerbaruByUser(idPenggunaAktif())
+            : null;
+        // Aturan wireframe UI-008: setelah ditolak, pengajuan ulang baru boleh 14 hari kemudian
+        $bolehAjukan = $pengajuan === null
+            || $pengajuan['status_dokumen'] !== 'Ditolak'
+            || bolehAjukanUlang($pengajuan['tanggal_keputusan'], date('Y-m-d'));
+        $old = $_SESSION['old'] ?? [];
+        $errors = $_SESSION['errors'] ?? [];
+        unset($_SESSION['old'], $_SESSION['errors']);
+        $daftarJenis = VerifikasiFundraiserEntity::DAFTAR_JENIS;
+
+        require __DIR__ . '/../../views/auth/ajukan_verifikasi.php';
+    }
+
+    /**
+     * Memproses pengiriman pengajuan verifikasi akun fundraiser (UI-008): data diri + dokumen
+     */
+    public function kirimPengajuanVerifikasi(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            alihkan('dashboard_donatur.php');
+        }
+
+        wajibLogin();
+        verifikasiCsrf('ajukan_verifikasi.php');
+
+        $idUser = idPenggunaAktif();
+        $pengajuanLama = $this->verifikasiEntity !== null
+            ? $this->verifikasiEntity->ambilTerbaruByUser($idUser)
+            : null;
+
+        if ($pengajuanLama !== null && $pengajuanLama['status_dokumen'] === 'Menunggu') {
+            setPesan('info', 'Pengajuan Anda masih menunggu tinjauan admin.');
+            alihkan('ajukan_verifikasi.php');
+        }
+
+        if ($pengajuanLama !== null
+            && $pengajuanLama['status_dokumen'] === 'Ditolak'
+            && !bolehAjukanUlang($pengajuanLama['tanggal_keputusan'], date('Y-m-d'))) {
+            setPesan('info', 'Pengajuan ulang baru dapat dilakukan 14 hari setelah penolakan.');
+            alihkan('ajukan_verifikasi.php');
+        }
+
+        $jenisFundraiser = trim((string) ($_POST['jenis_fundraiser'] ?? ''));
+        $namaLengkap = trim((string) ($_POST['nama_lengkap'] ?? ''));
+        $nomorIdentitas = trim((string) ($_POST['nomor_identitas'] ?? ''));
+        $nomorTelepon = trim((string) ($_POST['nomor_telepon'] ?? ''));
+
+        $errors = [];
+        $old = [
+            'jenis_fundraiser' => $jenisFundraiser,
+            'nama_lengkap'     => $namaLengkap,
+            'nomor_identitas'  => $nomorIdentitas,
+            'nomor_telepon'    => $nomorTelepon,
+        ];
+
+        if (!in_array($jenisFundraiser, VerifikasiFundraiserEntity::DAFTAR_JENIS, true)) {
+            $errors[] = 'Jenis fundraiser wajib dipilih (Individu atau Organisasi).';
+        }
+        if ($namaLengkap === '' || mb_strlen($namaLengkap) > 150) {
+            $errors[] = 'Nama lengkap wajib diisi, maksimal 150 karakter.';
+        }
+        if ($nomorIdentitas === '' || mb_strlen($nomorIdentitas) > 50) {
+            $errors[] = 'NIK atau NPWP wajib diisi, maksimal 50 karakter.';
+        }
+        if ($nomorTelepon === '' || mb_strlen($nomorTelepon) > 20) {
+            $errors[] = 'Nomor telepon wajib diisi, maksimal 20 karakter.';
+        }
+
+        // Validasi unggahan di batas kepercayaan: wajib + opsional (kertas bermaterai / SK & NPWP)
+        $berkasDokumen = $_FILES['dokumen_verifikasi'] ?? null;
+        $berkasPendukung = $_FILES['dokumen_pendukung'] ?? null;
+        $tanpaDokumen = !isset($berkasDokumen) || (int) ($berkasDokumen['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE;
+        $adaPendukung = isset($berkasPendukung) && (int) ($berkasPendukung['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+
+        if ($tanpaDokumen) {
+            $errors[] = 'Dokumen utama (KTP/akta pendirian) wajib diunggah.';
+        }
+
+        if ($errors !== []) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['old'] = $old;
+            alihkan('ajukan_verifikasi.php');
+        }
+
+        $hasilDokumen = UnggahBerkas::simpan($berkasDokumen, DIR_UPLOAD_VERIFIKASI, ['pdf', 'jpg', 'jpeg', 'png'], UKURAN_MAKS_UPLOAD);
+        if (!$hasilDokumen['berhasil']) {
+            $_SESSION['errors'] = ['Dokumen utama: ' . $hasilDokumen['pesan']];
+            $_SESSION['old'] = $old;
+            alihkan('ajukan_verifikasi.php');
+        }
+
+        $namaPendukung = null;
+        if ($adaPendukung) {
+            $hasilPendukung = UnggahBerkas::simpan($berkasPendukung, DIR_UPLOAD_VERIFIKASI, ['pdf', 'jpg', 'jpeg', 'png'], UKURAN_MAKS_UPLOAD);
+            if (!$hasilPendukung['berhasil']) {
+                UnggahBerkas::hapus(DIR_UPLOAD_VERIFIKASI, $hasilDokumen['nama_file']);
+                $_SESSION['errors'] = ['Dokumen pendukung: ' . $hasilPendukung['pesan']];
+                $_SESSION['old'] = $old;
+                alihkan('ajukan_verifikasi.php');
+            }
+            $namaPendukung = $hasilPendukung['nama_file'];
+        }
+
+        try {
+            $this->verifikasiEntity->buatPengajuan([
+                'id_user'            => $idUser,
+                'jenis_fundraiser'   => $jenisFundraiser,
+                'nama_lengkap'       => $namaLengkap,
+                'nomor_identitas'    => $nomorIdentitas,
+                'nomor_telepon'      => $nomorTelepon,
+                'dokumen_verifikasi' => $hasilDokumen['nama_file'],
+                'dokumen_pendukung'  => $namaPendukung,
+            ]);
+
+            setPesan('success', 'Pengajuan verifikasi terkirim dan menunggu tinjauan admin.');
+            alihkan('dashboard_donatur.php');
+        } catch (PDOException $e) {
+            UnggahBerkas::hapus(DIR_UPLOAD_VERIFIKASI, $hasilDokumen['nama_file']);
+            if ($namaPendukung !== null) {
+                UnggahBerkas::hapus(DIR_UPLOAD_VERIFIKASI, $namaPendukung);
+            }
+
+            $_SESSION['errors'] = ['Pengajuan gagal disimpan ke database. Silakan coba kembali.'];
+            $_SESSION['old'] = $old;
+            alihkan('ajukan_verifikasi.php');
+        }
+    }
+
+    /**
+     * Menampilkan halaman verifikasi wajah (UI-007), gerbang fundraiser sebelum masuk dashboard
+     */
+    public function tampilkanVerifikasiWajah(): void
+    {
+        wajibLogin('Fundraiser');
+
+        $judulHalaman = 'Verifikasi Wajah';
+        $errors = $_SESSION['errors'] ?? [];
+        unset($_SESSION['errors']);
+        $sudahTerverifikasi = !$this->modelPengguna->butuhVerifikasiWajah(idPenggunaAktif());
+
+        require __DIR__ . '/../../views/auth/verifikasi_wajah.php';
+    }
+
+    /**
+     * Memproses verifikasi wajah (UI-007): unggah selfie lalu pencocokan simulasi
+     */
+    public function prosesVerifikasiWajah(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            alihkan('verifikasi_wajah.php');
+        }
+
+        wajibLogin('Fundraiser');
+        verifikasiCsrf('verifikasi_wajah.php');
+
+        $idUser = idPenggunaAktif();
+        $skenarioSimulasi = trim((string) ($_POST['simulasi_hasil'] ?? 'Berhasil'));
+
+        $berkasWajah = $_FILES['foto_wajah'] ?? null;
+        if (!isset($berkasWajah) || (int) ($berkasWajah['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+            $_SESSION['errors'] = ['Foto wajah wajib diambil terlebih dahulu.'];
+            alihkan('verifikasi_wajah.php');
+        }
+
+        $hasilWajah = UnggahBerkas::simpan($berkasWajah, DIR_UPLOAD_VERIFIKASI, ['jpg', 'jpeg', 'png'], UKURAN_MAKS_UPLOAD);
+        if (!$hasilWajah['berhasil']) {
+            $_SESSION['errors'] = ['Foto wajah: ' . $hasilWajah['pesan']];
+            alihkan('verifikasi_wajah.php');
+        }
+
+        // Pencocokan wajah disimulasikan seperti payment gateway (SDD 1.3): sistem menilai selfie yang diunggah
+        if ($skenarioSimulasi === 'Berhasil') {
+            $this->modelPengguna->simpanFotoWajah($idUser, $hasilWajah['nama_file']);
+            setPesan('success', 'Verifikasi wajah berhasil. Selamat datang, penggalang dana!');
+            alihkan('dashboard_fundraiser.php');
+        }
+
+        // Gagal: foto tidak disimpan, verifikasi diulang di halaman ini (wireframe UI-007 poin 4)
+        UnggahBerkas::hapus(DIR_UPLOAD_VERIFIKASI, $hasilWajah['nama_file']);
+        $_SESSION['errors'] = ['Verifikasi wajah gagal, wajah tidak cocok. Silakan ambil foto kembali.'];
+        alihkan('verifikasi_wajah.php');
     }
 }
