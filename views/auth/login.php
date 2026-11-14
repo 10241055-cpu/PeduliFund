@@ -53,9 +53,30 @@ require __DIR__ . '/../layout/header.php';
                             </p>
                         </div>
                     </form>
+
+                    <!-- Pengisi otomatis akun data sampel, hanya untuk pengujian manual -->
+                    <div class="pf-akun-uji text-center mt-4 pt-3 border-top">
+                        <p class="pf-subjudul mb-2">Akun uji data sampel</p>
+                        <div class="d-flex flex-wrap justify-content-center gap-2" id="akun-uji">
+                            <a class="btn-pf-outline" href="<?= e(BASE_URL) ?>/index.php">Guest</a>
+                            <button type="button" class="btn-pf-outline" data-email="admin@pedulifund.test">Admin</button>
+                            <button type="button" class="btn-pf-outline" data-email="fundraiser@pedulifund.test">Fundraiser</button>
+                            <button type="button" class="btn-pf-outline" data-email="donatur@pedulifund.test">Donatur</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+<script>
+document.getElementById('akun-uji').addEventListener('click', function (peristiwa) {
+    var tombol = peristiwa.target.closest('button[data-email]');
+    if (!tombol) {
+        return;
+    }
+    document.getElementById('email').value = tombol.dataset.email;
+    document.getElementById('password').value = 'password';
+});
+</script>
 <?php require __DIR__ . '/../layout/footer.php'; ?>
