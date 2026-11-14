@@ -598,6 +598,20 @@ body {
         margin: 12px 12px 0;
     }
 
+    /* Satu baris menu lebih lebar dari layar ponsel dan terpotong overflow:hidden; dipilin ke bawah.
+       Radius pill pada kotak dua baris membentuk elips, jadi dipakai radius kartu. */
+    .pf-navbar {
+        justify-content: center;
+        border-radius: var(--radius-card);
+    }
+
+    .pf-menu {
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+        border-radius: var(--radius-card);
+    }
+
     .pf-main {
         padding: 16px 14px 8px;
     }
