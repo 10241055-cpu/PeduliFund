@@ -31,7 +31,12 @@ $pesan = ambilPesan();
                         $urlDashboard = BASE_URL . '/dashboard_admin.php';
                     }
                     ?>
-                    <a class="pf-menu-item <?= (isset($judulHalaman) && strpos($judulHalaman, 'Review Pencairan') === false) ? 'pf-menu-item-aktif' : '' ?>" href="<?= e($urlDashboard) ?>">Dashboard</a>
+                    <?php
+                    // Dashboard hanya menyala bila tidak ada menu lain yang cocok dengan halaman ini
+                    $menuDashboardAktif = isset($judulHalaman) && !$menuCampaignAktif
+                        && strpos($judulHalaman, 'Review Pencairan') === false;
+                    ?>
+                    <a class="pf-menu-item <?= $menuDashboardAktif ? 'pf-menu-item-aktif' : '' ?>" href="<?= e($urlDashboard) ?>">Dashboard</a>
                     <?php if ($peran === 'Admin'): ?>
                         <a class="pf-menu-item <?= (isset($judulHalaman) && strpos($judulHalaman, 'Review Pencairan') !== false) ? 'pf-menu-item-aktif' : '' ?>" href="<?= e(BASE_URL) ?>/review_pencairan.php">Review Pencairan</a>
                     <?php endif; ?>
