@@ -18,7 +18,7 @@ $pengguna = penggunaAktif();
             <div class="col-md-4">
                 <div class="pf-card p-3 p-md-4">
                     <span class="pf-metrik-label">Akun Menunggu</span>
-                    <span class="pf-metrik-nilai mt-1">0</span>
+                    <span class="pf-metrik-nilai mt-1"><?= e((string) ($jumlahAkunMenunggu ?? 0)) ?></span>
                     <span class="pf-metrik-sub">Pengajuan verifikasi fundraiser</span>
                 </div>
             </div>
@@ -46,14 +46,14 @@ $pengguna = penggunaAktif();
                 <div class="pf-card p-4 text-center">
                     <h3 class="h6 fw-bold mb-2">Verifikasi Akun</h3>
                     <p class="small text-muted mb-3">Tinjau kelengkapan dokumen pengajuan fundraiser</p>
-                    <button class="btn-pf-outline w-100" disabled>Verifikasi Akun</button>
+                    <a href="<?= e(BASE_URL) ?>/verifikasi_akun.php" class="btn-pf-outline w-100 justify-content-center">Verifikasi Akun</a>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="pf-card p-4 text-center">
                     <h3 class="h6 fw-bold mb-2">Verifikasi Campaign</h3>
                     <p class="small text-muted mb-3">Tinjau dan setujui campaign baru dari fundraiser</p>
-                    <button class="btn-pf-outline w-100" disabled title="Halaman verifikasi campaign (UI-013) belum tersedia">Tinjau Campaign</button>
+                    <a href="<?= e(BASE_URL) ?>/verifikasi_campaign.php" class="btn-pf-outline w-100 justify-content-center">Tinjau Campaign</a>
                 </div>
             </div>
             <div class="col-md-4">

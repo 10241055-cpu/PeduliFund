@@ -145,7 +145,12 @@ $bisaBuatCampaign = !$akunDibekukan && !$adaTagihanLpj;
                                         <small class="pf-teks-bantu"><?= e((string) $persen) ?>%</small>
                                     </td>
                                     <td class="pf-angka"><?= e(formatTanggal($campaign['deadline'])) ?></td>
-                                    <td><span class="pf-badge <?= e(kelasBadgeStatus($campaign['status_campaign'])) ?>"><span class="pf-badge-pil"><?= e($campaign['status_campaign']) ?></span></span></td>
+                                    <td>
+                                        <span class="pf-badge <?= e(kelasBadgeStatus($campaign['status_campaign'])) ?>"><span class="pf-badge-pil"><?= e($campaign['status_campaign']) ?></span></span>
+                                        <?php if ($campaign['status_campaign'] === 'Ditolak' && !empty($campaign['alasan_penolakan'])): ?>
+                                            <div class="pf-teks-bantu mt-1">Alasan: <?= e($campaign['alasan_penolakan']) ?></div>
+                                        <?php endif; ?>
+                                    </td>
                                     <td>
                                         <?php if ($pencairan === null): ?>
                                             <span class="pf-teks-bantu">Belum diajukan</span>
@@ -176,6 +181,9 @@ $bisaBuatCampaign = !$akunDibekukan && !$adaTagihanLpj;
                                         <div class="d-flex flex-wrap gap-2 align-items-center">
                                             <?php if ($campaign['status_campaign'] === 'Aktif'): ?>
                                                 <a class="btn-pf-outline py-1 px-3" style="font-size: 11px;" href="<?= e(BASE_URL) ?>/donasi.php?id=<?= e((string) $campaign['id_campaign']) ?>">Donasi</a>
+                                            <?php endif; ?>
+                                            <?php if ($campaign['status_campaign'] === 'Ditolak'): ?>
+                                                <a class="btn-pf-cta btn-pf-tabel" href="<?= e(BASE_URL) ?>/buat_campaign.php?id=<?= e((string) $idCampaign) ?>">Perbaiki</a>
                                             <?php endif; ?>
                                             <?php if ($layakCair): ?>
                                                 <a class="btn-pf-cta btn-pf-tabel" href="<?= e(BASE_URL) ?>/pengajuan_pencairan.php?id_campaign=<?= e((string) $idCampaign) ?>">

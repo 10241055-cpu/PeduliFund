@@ -8,17 +8,20 @@ class CampaignController
     private ?PencairanEntity $pencairanEntity;
     private ?UserCredentialsDB $userModel;
     private ?PencairanController $pencairanController;
+    private ?VerifikasiFundraiserEntity $verifikasiEntity;
 
     public function __construct(
         CampaignEntity $campaignEntity,
         ?PencairanEntity $pencairanEntity = null,
         ?UserCredentialsDB $userModel = null,
-        ?PencairanController $pencairanController = null
+        ?PencairanController $pencairanController = null,
+        ?VerifikasiFundraiserEntity $verifikasiEntity = null
     ) {
         $this->campaignEntity = $campaignEntity;
         $this->pencairanEntity = $pencairanEntity;
         $this->userModel = $userModel;
         $this->pencairanController = $pencairanController;
+        $this->verifikasiEntity = $verifikasiEntity;
     }
 
     /**
@@ -58,7 +61,7 @@ class CampaignController
     }
 
     /**
-     * Menampilkan form pembuatan campaign baru (UI-010)
+     * Menampilkan form pembuatan/revisi campaign (UI-010); ?id= memuat campaign milik fundraiser
      */
     public function tampilkanFormCampaign(): void
     {
@@ -68,13 +71,33 @@ class CampaignController
         $old = $_SESSION['old'] ?? [];
         unset($_SESSION['errors'], $_SESSION['old']);
 
+        // Mode revisi: campaign milik pemilik yang masih boleh diubah (Pending/Ditolak/Aktif)
+        $idEdit = (int) ($_GET['id'] ?? 0);
+        $campaignEdit = $idEdit > 0
+            ? $this->campaignEntity->ambilByIdCampaign($idEdit, idPenggunaAktif())
+            : null;
+        if ($campaignEdit !== null && !in_array($campaignEdit['status_campaign'], ['Pending', 'Ditolak', 'Aktif'], true)) {
+            $campaignEdit = null;
+        }
+        // Prefill dari data campaign bila pengguna datang tanpa sisa input lama
+        if ($campaignEdit !== null && $old === []) {
+            $old = [
+                'judul'       => (string) $campaignEdit['judul'],
+                'jenis'       => (string) $campaignEdit['jenis'],
+                'deskripsi'   => (string) $campaignEdit['deskripsi'],
+                'target_dana' => (string) $campaignEdit['target_dana'],
+                'deadline'    => (string) $campaignEdit['deadline'],
+            ];
+        }
+
         $daftarJenis = CampaignEntity::DAFTAR_JENIS;
 
         require __DIR__ . '/../../views/form_campaign.php';
     }
 
     /**
-     * Memproses pengiriman form campaign (POST) dan menyimpannya berstatus Pending
+     * Memproses pengiriman form campaign (POST): campaign baru berstatus Pending,
+     * revisi kembali ke Pending untuk diverifikasi ulang (SDD 3.1.2)
      */
     public function kirimCampaign(): void
     {
@@ -85,6 +108,15 @@ class CampaignController
         verifikasiCsrf();
         $this->pastikanBolehMembuatCampaign();
 
+        $idEdit = (int) ($_POST['id_campaign'] ?? 0);
+        $campaignEdit = $idEdit > 0
+            ? $this->campaignEntity->ambilByIdCampaign($idEdit, idPenggunaAktif())
+            : null;
+        if ($idEdit > 0 && $campaignEdit === null) {
+            setPesan('danger', 'Campaign tidak ditemukan atau bukan milik Anda.');
+            alihkan('dashboard_fundraiser.php');
+        }
+
         $judul = trim((string) ($_POST['judul'] ?? ''));
         $jenis = trim((string) ($_POST['jenis'] ?? ''));
         $deskripsi = trim((string) ($_POST['deskripsi'] ?? ''));
@@ -92,6 +124,7 @@ class CampaignController
         $deadline = trim((string) ($_POST['deadline'] ?? ''));
 
         $old = [
+            'id_campaign' => (string) $idEdit,
             'judul'       => $judul,
             'jenis'       => $jenis,
             'deskripsi'   => $deskripsi,
@@ -135,11 +168,12 @@ class CampaignController
             $errors[] = 'Deadline tidak boleh sebelum hari ini.';
         }
 
-        // Validasi 6 & 7: Keberadaan dokumen_campaign (wajib) dan gambar_campaign (opsional)
+        // Validasi 6 & 7: dokumen_campaign wajib untuk campaign baru; pada revisi boleh mempertahankan lama
         $berkasDokumen = $_FILES['dokumen_campaign'] ?? null;
         $berkasGambar = $_FILES['gambar_campaign'] ?? null;
 
-        if (!isset($berkasDokumen) || (int) ($berkasDokumen['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        $tanpaDokumen = !isset($berkasDokumen) || (int) ($berkasDokumen['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE;
+        if ($tanpaDokumen && ($idEdit === 0 || empty($campaignEdit['dokumen_campaign']))) {
             $errors[] = 'Dokumen campaign wajib diunggah.';
         }
 
@@ -148,25 +182,31 @@ class CampaignController
         if (!empty($errors)) {
             $_SESSION['errors'] = $errors;
             $_SESSION['old'] = $old;
-            alihkan('buat_campaign.php');
+            alihkan($idEdit > 0 ? 'buat_campaign.php?id=' . $idEdit : 'buat_campaign.php');
         }
 
         // Unggah dokumen_campaign (wajib: pdf, jpg, jpeg, png; maks 2 MB)
-        $hasilDokumen = UnggahBerkas::simpan(
-            $berkasDokumen,
-            DIR_UPLOAD_DOKUMEN,
-            ['pdf', 'jpg', 'jpeg', 'png'],
-            UKURAN_MAKS_UPLOAD
-        );
+        $namaDokumen = (string) ($campaignEdit['dokumen_campaign'] ?? '');
+        if (!$tanpaDokumen) {
+            $hasilDokumen = UnggahBerkas::simpan(
+                $berkasDokumen,
+                DIR_UPLOAD_DOKUMEN,
+                ['pdf', 'jpg', 'jpeg', 'png'],
+                UKURAN_MAKS_UPLOAD
+            );
 
-        if (!$hasilDokumen['berhasil']) {
-            $_SESSION['errors'] = ['Dokumen campaign: ' . $hasilDokumen['pesan']];
-            $_SESSION['old'] = $old;
-            alihkan('buat_campaign.php');
+            if (!$hasilDokumen['berhasil']) {
+                $_SESSION['errors'] = ['Dokumen campaign: ' . $hasilDokumen['pesan']];
+                $_SESSION['old'] = $old;
+                alihkan($idEdit > 0 ? 'buat_campaign.php?id=' . $idEdit : 'buat_campaign.php');
+            }
+
+            $namaDokumen = $hasilDokumen['nama_file'];
         }
 
-        $namaDokumen = $hasilDokumen['nama_file'];
-        $namaGambar = null;
+        $namaGambar = $campaignEdit !== null && !empty($campaignEdit['gambar_campaign'])
+            ? (string) $campaignEdit['gambar_campaign']
+            : null;
 
         // Unggah gambar_campaign jika diisi (opsional: jpg, jpeg, png; maks 2 MB)
         if ($adaGambar) {
@@ -178,39 +218,66 @@ class CampaignController
             );
 
             if (!$hasilGambar['berhasil']) {
-                UnggahBerkas::hapus(DIR_UPLOAD_DOKUMEN, $namaDokumen);
+                if (!$tanpaDokumen) {
+                    UnggahBerkas::hapus(DIR_UPLOAD_DOKUMEN, $namaDokumen);
+                }
 
                 $_SESSION['errors'] = ['Gambar campaign: ' . $hasilGambar['pesan']];
                 $_SESSION['old'] = $old;
-                alihkan('buat_campaign.php');
+                alihkan($idEdit > 0 ? 'buat_campaign.php?id=' . $idEdit : 'buat_campaign.php');
             }
 
             $namaGambar = $hasilGambar['nama_file'];
         }
 
-        try {
-            $this->campaignEntity->simpanCampaign([
-                'id_fundraiser'    => idPenggunaAktif(),
-                'judul'            => $judul,
-                'jenis'            => $jenis,
-                'deskripsi'        => $deskripsi,
-                'target_dana'      => (float) $targetDana,
-                'deadline'         => $deadline,
-                'dokumen_campaign' => $namaDokumen,
-                'gambar_campaign'  => $namaGambar,
-            ]);
+        $dataTersimpan = [
+            'judul'            => $judul,
+            'jenis'            => $jenis,
+            'deskripsi'        => $deskripsi,
+            'target_dana'      => (float) $targetDana,
+            'deadline'         => $deadline,
+            'dokumen_campaign' => $namaDokumen,
+            'gambar_campaign'  => $namaGambar,
+        ];
 
-            setPesan('success', 'Campaign berhasil dikirim dan menunggu verifikasi admin.');
+        try {
+            if ($idEdit > 0) {
+                $berhasil = $this->campaignEntity->perbaruiCampaignRevisi($idEdit, idPenggunaAktif(), $dataTersimpan) !== null;
+                $pesanSukses = 'Revisi campaign tersimpan dan kembali menunggu verifikasi admin.';
+            } else {
+                $dataTersimpan['id_fundraiser'] = idPenggunaAktif();
+                $this->campaignEntity->simpanCampaign($dataTersimpan);
+                $berhasil = true;
+                $pesanSukses = 'Campaign berhasil dikirim dan menunggu verifikasi admin.';
+            }
+
+            if (!$berhasil) {
+                throw new PDOException('Tidak ada baris yang berubah.');
+            }
+
+            // Berkas lama ikut dibuang bila digantikan agar folder upload tidak menumpuk sampah
+            if ($campaignEdit !== null && $namaDokumen !== (string) $campaignEdit['dokumen_campaign']) {
+                UnggahBerkas::hapus(DIR_UPLOAD_DOKUMEN, (string) $campaignEdit['dokumen_campaign']);
+            }
+            if ($campaignEdit !== null
+                && $namaGambar !== null
+                && $namaGambar !== (string) ($campaignEdit['gambar_campaign'] ?? '')) {
+                UnggahBerkas::hapus(DIR_UPLOAD_GAMBAR, (string) $campaignEdit['gambar_campaign']);
+            }
+
+            setPesan('success', $pesanSukses);
             alihkan('dashboard_fundraiser.php');
         } catch (PDOException $e) {
-            UnggahBerkas::hapus(DIR_UPLOAD_DOKUMEN, $namaDokumen);
-            if ($namaGambar !== null) {
+            if ($namaDokumen !== '' && !$tanpaDokumen) {
+                UnggahBerkas::hapus(DIR_UPLOAD_DOKUMEN, $namaDokumen);
+            }
+            if ($adaGambar) {
                 UnggahBerkas::hapus(DIR_UPLOAD_GAMBAR, $namaGambar);
             }
 
             $_SESSION['errors'] = ['Campaign gagal disimpan ke database. Silakan coba kembali.'];
             $_SESSION['old'] = $old;
-            alihkan('buat_campaign.php');
+            alihkan($idEdit > 0 ? 'buat_campaign.php?id=' . $idEdit : 'buat_campaign.php');
         }
     }
 
@@ -255,6 +322,207 @@ class CampaignController
         }
 
         alihkan('dashboard_fundraiser.php');
+    }
+
+    /**
+     * Halaman verifikasi campaign admin (UI-013) + keputusan Setujui/Tolak (POST)
+     */
+    public function verifikasiCampaign(): void
+    {
+        $this->prosesKeputusanCampaign();
+
+        $daftarMenunggu = $this->campaignEntity->ambilCampaignMenungguVerifikasi();
+
+        require __DIR__ . '/../../views/verifikasi_campaign.php';
+    }
+
+    /**
+     * Memproses keputusan admin atas campaign Pending (SDD Bab 4.1.2: validasiCampaign)
+     */
+    private function prosesKeputusanCampaign(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return;
+        }
+
+        verifikasiCsrf('verifikasi_campaign.php');
+
+        $idCampaign = (int) ($_POST['id_campaign'] ?? 0);
+        $keputusan = trim((string) ($_POST['keputusan'] ?? ''));
+
+        if ($idCampaign <= 0 || !in_array($keputusan, ['setujui', 'tolak'], true)) {
+            setPesan('danger', 'Keputusan verifikasi tidak valid.');
+            alihkan('verifikasi_campaign.php');
+        }
+
+        if ($keputusan === 'setujui') {
+            if ($this->campaignEntity->publikasikanKePublik($idCampaign)) {
+                setPesan('success', 'Campaign disetujui, berstatus Aktif, dan tayang di daftar publik.');
+            } else {
+                setPesan('danger', 'Campaign tidak ditemukan atau sudah pernah diputuskan.');
+            }
+        } else {
+            $alasan = trim((string) ($_POST['alasan_penolakan'] ?? ''));
+            if ($alasan === '') {
+                setPesan('danger', 'Alasan penolakan wajib diisi.');
+                alihkan('verifikasi_campaign.php');
+            }
+
+            if ($this->campaignEntity->mintaRevisiFormulir($idCampaign, $alasan)) {
+                setPesan('success', 'Campaign ditolak; fundraiser dapat merevisi formulirnya.');
+            } else {
+                setPesan('danger', 'Campaign tidak ditemukan atau sudah pernah diputuskan.');
+            }
+        }
+
+        alihkan('verifikasi_campaign.php');
+    }
+
+    /**
+     * Halaman verifikasi akun admin (UI-012) + keputusan Setujui/Tolak (POST)
+     */
+    public function verifikasiAkun(): void
+    {
+        $this->prosesKeputusanAkun();
+
+        $daftarMenunggu = $this->verifikasiEntity !== null
+            ? $this->verifikasiEntity->ambilMenunggu()
+            : [];
+
+        require __DIR__ . '/../../views/verifikasi_akun.php';
+    }
+
+    /**
+     * Memproses keputusan admin atas pengajuan verifikasi akun (UI-012)
+     */
+    private function prosesKeputusanAkun(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST'
+            || ($_POST['jenis_verifikasi'] ?? '') !== 'akun'
+            || $this->verifikasiEntity === null
+            || $this->userModel === null) {
+            return;
+        }
+
+        verifikasiCsrf('verifikasi_akun.php');
+
+        $idVerifikasi = (int) ($_POST['id_verifikasi'] ?? 0);
+        $keputusan = trim((string) ($_POST['keputusan'] ?? ''));
+
+        $pengajuan = $idVerifikasi > 0 ? $this->verifikasiEntity->ambilById($idVerifikasi) : null;
+        if ($pengajuan === null || !in_array($keputusan, ['setujui', 'tolak'], true)) {
+            setPesan('danger', 'Pengajuan verifikasi tidak valid.');
+            alihkan('verifikasi_akun.php');
+        }
+
+        if ($keputusan === 'setujui') {
+            if ($this->verifikasiEntity->setujui($idVerifikasi)) {
+                // Persetujuan dokumen menaikkan peran pemohon menjadi Fundraiser (SDD UI-012 poin 3)
+                $this->userModel->ubahRole((int) $pengajuan['id_user'], 'Fundraiser');
+                setPesan('success', 'Pengajuan disetujui; akun pemohon kini berperan sebagai Fundraiser.');
+            } else {
+                setPesan('danger', 'Pengajuan tidak ditemukan atau sudah pernah diputuskan.');
+            }
+        } else {
+            $alasan = trim((string) ($_POST['alasan_penolakan'] ?? ''));
+            if ($alasan === '') {
+                setPesan('danger', 'Alasan penolakan wajib diisi.');
+                alihkan('verifikasi_akun.php');
+            }
+
+            if ($this->verifikasiEntity->tolak($idVerifikasi, $alasan)) {
+                setPesan('success', 'Pengajuan ditolak; pemohon dapat mengajukan ulang 14 hari lagi.');
+            } else {
+                setPesan('danger', 'Pengajuan tidak ditemukan atau sudah pernah diputuskan.');
+            }
+        }
+
+        alihkan('verifikasi_akun.php');
+    }
+
+    /**
+     * Pratinjau dokumen campaign khusus admin (pendukung UI-013)
+     */
+    public function unduhDokumenCampaign(): void
+    {
+        $this->layaniUnduhDokumen(
+            static fn (): ?array => null,
+            'dokumen_campaign'
+        );
+    }
+
+    /**
+     * Pratinjau dokumen pengajuan verifikasi akun khusus admin (pendukung UI-012)
+     */
+    public function unduhDokumenVerifikasi(): void
+    {
+        $this->layaniUnduhDokumen(
+            fn (int $id): ?array => $this->verifikasiEntity !== null ? $this->verifikasiEntity->ambilById($id) : null,
+            'dokumen_verifikasi'
+        );
+    }
+
+    /**
+     * Melayani berkas pratinjau untuk admin: kampanye (dokumen_campaign) atau verifikasi akun
+     */
+    private function layaniUnduhDokumen(callable $pencariBerkas, string $jenisBerkas): void
+    {
+        if (peranPenggunaAktif() !== 'Admin') {
+            http_response_code(403);
+            exit('Hanya admin yang dapat mengakses berkas ini.');
+        }
+
+        if ($jenisBerkas === 'dokumen_campaign') {
+            $id = (int) ($_GET['id_campaign'] ?? 0);
+            $baris = $id > 0 ? $this->campaignEntity->ambilByIdUntukAdmin($id) : null;
+            $kolomDokumen = 'dokumen_campaign';
+            $kolomPendukung = 'gambar_campaign';
+        } else {
+            $id = (int) ($_GET['id_verifikasi'] ?? 0);
+            $baris = $pencariBerkas($id);
+            $kolomDokumen = 'dokumen_verifikasi';
+            $kolomPendukung = 'dokumen_pendukung';
+        }
+
+        if ($baris === null) {
+            http_response_code(404);
+            exit('Data tidak ditemukan.');
+        }
+
+        $pilihan = trim((string) ($_GET['jenis'] ?? ''));
+        $namaFile = $pilihan === 'pendukung'
+            ? (string) ($baris[$kolomPendukung] ?? '')
+            : (string) ($baris[$kolomDokumen] ?? '');
+
+        if ($namaFile === '' || basename($namaFile) !== $namaFile) {
+            http_response_code(404);
+            exit('Berkas tidak tersedia.');
+        }
+
+        // Gambar campaign tinggal di folder gambar; dokumen campaign & berkas verifikasi di folder masing-masing
+        $folder = $jenisBerkas === 'dokumen_campaign'
+            ? ($pilihan === 'pendukung' ? DIR_UPLOAD_GAMBAR : DIR_UPLOAD_DOKUMEN)
+            : DIR_UPLOAD_VERIFIKASI;
+        $lokasiFile = rtrim($folder, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $namaFile;
+        if (!is_file($lokasiFile)) {
+            http_response_code(404);
+            exit('Berkas tidak ditemukan di penyimpanan.');
+        }
+
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime = (string) $finfo->file($lokasiFile);
+        $mimeAman = ['application/pdf', 'image/jpeg', 'image/png'];
+        if (!in_array($mime, $mimeAman, true)) {
+            http_response_code(403);
+            exit('Tipe berkas tidak diizinkan untuk ditampilkan.');
+        }
+
+        header('Content-Type: ' . $mime);
+        header('Content-Length: ' . filesize($lokasiFile));
+        header('Content-Disposition: inline; filename="' . $namaFile . '"');
+        header('X-Content-Type-Options: nosniff');
+        readfile($lokasiFile);
+        exit;
     }
 
     /**

@@ -130,6 +130,101 @@ class CampaignEntity
     }
 
     /**
+     * Memperbarui campaign milik fundraiser saat revisi (SDD Bab 4.1.2):
+     * status kembali ke Pending untuk diverifikasi ulang admin; null jika bukan pemilik
+     */
+    public function perbaruiCampaignRevisi(int $idCampaign, int $idFundraiser, array $data): ?int
+    {
+        $sql = "UPDATE campaign SET
+                    judul = :judul, jenis = :jenis, deskripsi = :deskripsi,
+                    target_dana = :target_dana, deadline = :deadline,
+                    dokumen_campaign = :dokumen_campaign, gambar_campaign = :gambar_campaign,
+                    status_campaign = 'Pending', alasan_penolakan = NULL
+                WHERE id_campaign = :id_campaign AND id_fundraiser = :id_fundraiser
+                  AND status_campaign IN ('Pending', 'Ditolak', 'Aktif')";
+
+        $pernyataan = $this->pdo->prepare($sql);
+        $pernyataan->execute([
+            ':judul'            => (string) $data['judul'],
+            ':jenis'            => (string) $data['jenis'],
+            ':deskripsi'        => (string) $data['deskripsi'],
+            ':target_dana'      => (float) $data['target_dana'],
+            ':deadline'         => (string) $data['deadline'],
+            ':dokumen_campaign' => (string) $data['dokumen_campaign'],
+            ':gambar_campaign'  => !empty($data['gambar_campaign']) ? (string) $data['gambar_campaign'] : null,
+            ':id_campaign'      => $idCampaign,
+            ':id_fundraiser'    => $idFundraiser,
+        ]);
+
+        return $pernyataan->rowCount() > 0 ? $idCampaign : null;
+    }
+
+    /**
+     * Daftar campaign berstatus Pending untuk ditinjau admin (UI-013), terlama dulu
+     */
+    public function ambilCampaignMenungguVerifikasi(): array
+    {
+        $sql = 'SELECT c.*, p.email
+                FROM campaign c
+                INNER JOIN pengguna p ON p.id_user = c.id_fundraiser
+                WHERE c.status_campaign = :status
+                ORDER BY c.id_campaign ASC';
+
+        $pernyataan = $this->pdo->prepare($sql);
+        $pernyataan->execute([':status' => 'Pending']);
+
+        return $pernyataan->fetchAll();
+    }
+
+    /**
+     * Mengambil satu campaign (status apa pun) tanpa filter pemilik, untuk pratinjau admin
+     */
+    public function ambilByIdUntukAdmin(int $idCampaign): ?array
+    {
+        $pernyataan = $this->pdo->prepare(
+            'SELECT * FROM campaign WHERE id_campaign = :id_campaign LIMIT 1'
+        );
+        $pernyataan->execute([':id_campaign' => $idCampaign]);
+        $campaign = $pernyataan->fetch();
+
+        return $campaign !== false ? $campaign : null;
+    }
+
+    /**
+     * Menyetujui campaign Pending menjadi Aktif (SDD Bab 4.1.2: publikasikanKePublik);
+     * hanya baris berstatus Pending yang bisa berpindah
+     */
+    public function publikasikanKePublik(int $idCampaign): bool
+    {
+        $pernyataan = $this->pdo->prepare(
+            "UPDATE campaign SET status_campaign = 'Aktif', alasan_penolakan = NULL
+             WHERE id_campaign = :id_campaign AND status_campaign = 'Pending'"
+        );
+        $pernyataan->execute([':id_campaign' => $idCampaign]);
+
+        return $pernyataan->rowCount() > 0;
+    }
+
+    /**
+     * Menolak campaign Pending dengan alasan wajib (SDD Bab 4.1.2: mintaRevisiFormulir);
+     * fundraiser memperbaiki di UI-010 lalu mengajukan ulang
+     */
+    public function mintaRevisiFormulir(int $idCampaign, string $alasan): bool
+    {
+        if (trim($alasan) === '') {
+            return false;
+        }
+
+        $pernyataan = $this->pdo->prepare(
+            "UPDATE campaign SET status_campaign = 'Ditolak', alasan_penolakan = :alasan
+             WHERE id_campaign = :id_campaign AND status_campaign = 'Pending'"
+        );
+        $pernyataan->execute([':alasan' => trim($alasan), ':id_campaign' => $idCampaign]);
+
+        return $pernyataan->rowCount() > 0;
+    }
+
+    /**
      * Mengambil satu data campaign aktif untuk keperluan donasi publik (SDD SEQ-003)
      */
     public function ambilCampaignAktifById(int $idCampaign): ?array

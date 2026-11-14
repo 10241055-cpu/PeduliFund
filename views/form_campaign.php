@@ -1,15 +1,20 @@
 <?php
-$judulHalaman = 'Buat Campaign';
+$judulHalaman = $campaignEdit !== null ? 'Revisi Campaign' : 'Buat Campaign';
 require __DIR__ . '/layout/header.php';
 $nilaiLama = static function (string $nama) use ($old): string {
     return e((string) ($old[$nama] ?? ''));
 };
+$modeRevisi = $campaignEdit !== null;
 ?>
 <section class="bagian-halaman">
     <div class="pf-tray">
         <div class="mb-4">
-            <h1 class="pf-h1">Buat Campaign</h1>
-            <p class="pf-subjudul mb-0 mt-1">Campaign baru akan berstatus Pending setelah dikirim.</p>
+            <h1 class="pf-h1"><?= $modeRevisi ? 'Revisi Campaign' : 'Buat Campaign' ?></h1>
+            <p class="pf-subjudul mb-0 mt-1">
+                <?= $modeRevisi
+                    ? 'Perubahan pada campaign "' . e($campaignEdit['judul']) . '" akan kembali menunggu verifikasi admin.'
+                    : 'Campaign baru akan berstatus Pending setelah dikirim.' ?>
+            </p>
         </div>
 
         <?php if ($errors !== []): ?>
@@ -25,6 +30,9 @@ $nilaiLama = static function (string $nama) use ($old): string {
 
         <form action="<?= e(BASE_URL) ?>/kirim_campaign.php" method="post" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="<?= e(tokenCsrf()) ?>">
+            <?php if ($modeRevisi): ?>
+                <input type="hidden" name="id_campaign" value="<?= e((string) $campaignEdit['id_campaign']) ?>">
+            <?php endif; ?>
             <div class="mb-3">
                 <label class="form-label" for="judul">Judul Campaign</label>
                 <input class="form-control" type="text" id="judul" name="judul" maxlength="255" required value="<?= $nilaiLama('judul') ?>">
@@ -54,8 +62,12 @@ $nilaiLama = static function (string $nama) use ($old): string {
             </div>
             <div class="mb-3">
                 <label class="form-label" for="dokumen_campaign">Dokumen Campaign</label>
-                <input class="form-control" type="file" id="dokumen_campaign" name="dokumen_campaign" accept=".pdf,.jpg,.jpeg,.png" required>
-                <div class="form-text">Wajib, format PDF/JPG/JPEG/PNG, maksimal 2 MB.</div>
+                <input class="form-control" type="file" id="dokumen_campaign" name="dokumen_campaign" accept=".pdf,.jpg,.jpeg,.png" <?= $modeRevisi ? '' : 'required' ?>>
+                <div class="form-text">
+                    <?= $modeRevisi
+                        ? 'Biarkan kosong untuk mempertahankan dokumen yang sudah diunggah. Format PDF/JPG/JPEG/PNG, maksimal 2 MB.'
+                        : 'Wajib, format PDF/JPG/JPEG/PNG, maksimal 2 MB.' ?>
+                </div>
             </div>
             <div class="mb-4">
                 <label class="form-label" for="gambar_campaign">Gambar Campaign (opsional)</label>
@@ -63,7 +75,7 @@ $nilaiLama = static function (string $nama) use ($old): string {
                 <div class="form-text">Format JPG/JPEG/PNG, maksimal 2 MB.</div>
             </div>
             <div class="d-flex gap-2">
-                <button class="btn-pf-cta" type="submit">Kirim Campaign</button>
+                <button class="btn-pf-cta" type="submit"><?= $modeRevisi ? 'Simpan Revisi' : 'Kirim Campaign' ?></button>
                 <a class="btn-pf-outline" href="<?= e(BASE_URL) ?>/dashboard_fundraiser.php">Batal</a>
             </div>
         </form>
