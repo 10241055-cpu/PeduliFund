@@ -135,13 +135,24 @@ class CampaignEntity
      */
     public function perbaruiCampaignRevisi(int $idCampaign, int $idFundraiser, array $data): ?int
     {
+        // Hak revisi diperiksa lebih dulu: rowCount() bernilai 0 juga saat data yang dikirim
+        // identik dengan yang tersimpan, sehingga tidak bisa dipakai sebagai bukti kepemilikan.
+        $pemeriksa = $this->pdo->prepare(
+            "SELECT id_campaign FROM campaign
+             WHERE id_campaign = :id_campaign AND id_fundraiser = :id_fundraiser
+               AND status_campaign IN ('Pending', 'Ditolak', 'Aktif')"
+        );
+        $pemeriksa->execute([':id_campaign' => $idCampaign, ':id_fundraiser' => $idFundraiser]);
+        if ($pemeriksa->fetch() === false) {
+            return null;
+        }
+
         $sql = "UPDATE campaign SET
                     judul = :judul, jenis = :jenis, deskripsi = :deskripsi,
                     target_dana = :target_dana, deadline = :deadline,
                     dokumen_campaign = :dokumen_campaign, gambar_campaign = :gambar_campaign,
                     status_campaign = 'Pending', alasan_penolakan = NULL
-                WHERE id_campaign = :id_campaign AND id_fundraiser = :id_fundraiser
-                  AND status_campaign IN ('Pending', 'Ditolak', 'Aktif')";
+                WHERE id_campaign = :id_campaign AND id_fundraiser = :id_fundraiser";
 
         $pernyataan = $this->pdo->prepare($sql);
         $pernyataan->execute([
@@ -156,7 +167,7 @@ class CampaignEntity
             ':id_fundraiser'    => $idFundraiser,
         ]);
 
-        return $pernyataan->rowCount() > 0 ? $idCampaign : null;
+        return $idCampaign;
     }
 
     /**
