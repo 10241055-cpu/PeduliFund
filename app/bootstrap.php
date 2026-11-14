@@ -15,6 +15,7 @@ require_once __DIR__ . '/models/UserCredentialsDB.php';
 require_once __DIR__ . '/models/CampaignEntity.php';
 require_once __DIR__ . '/models/DonasiEntity.php';
 require_once __DIR__ . '/models/PencairanEntity.php';
+require_once __DIR__ . '/models/VerifikasiFundraiserEntity.php';
 require_once __DIR__ . '/controllers/AuthController.php';
 require_once __DIR__ . '/controllers/CampaignController.php';
 require_once __DIR__ . '/controllers/DonationController.php';

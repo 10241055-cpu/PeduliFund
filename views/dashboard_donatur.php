@@ -13,7 +13,10 @@ $pengguna = penggunaAktif();
                 </p>
             </div>
             <div class="d-flex gap-2">
-                <a class="btn-pf-cta" href="<?= e(BASE_URL) ?>/dashboard_fundraiser.php">
+                <a class="btn-pf-outline" href="<?= e(BASE_URL) ?>/ajukan_verifikasi.php">
+                    Jadi Penggalang Dana
+                </a>
+                <a class="btn-pf-cta" href="<?= e(BASE_URL) ?>/daftar_campaign.php">
                     Lihat Campaign
                 </a>
             </div>
@@ -49,7 +52,7 @@ $pengguna = penggunaAktif();
             </div>
             <div class="text-center py-5 text-muted">
                 <p class="mb-0">Anda belum melakukan donasi ke program mana pun.</p>
-                <a href="<?= e(BASE_URL) ?>/dashboard_fundraiser.php" class="btn-pf-cta mt-3">
+                <a href="<?= e(BASE_URL) ?>/daftar_campaign.php" class="btn-pf-cta mt-3">
                     Mulai Salurkan Donasi
                 </a>
             </div>

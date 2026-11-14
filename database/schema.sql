@@ -14,7 +14,29 @@ CREATE TABLE IF NOT EXISTS pengguna (
     password VARCHAR(255) NOT NULL,
     role ENUM('Admin', 'Donatur', 'Fundraiser') NOT NULL,
     status_akun ENUM('Aktif', 'Dibekukan') NOT NULL DEFAULT 'Aktif',
-    suspend_sampai DATE NULL
+    suspend_sampai DATE NULL,
+    -- Di luar kamus SDD: gerbang UI-007 menuntut hasil verifikasi wajah tersimpan (NULL = belum lolos)
+    foto_wajah VARCHAR(255) NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabel verifikasi_fundraiser (SDD Bab 4.3 Tabel 4.3)
+CREATE TABLE IF NOT EXISTS verifikasi_fundraiser (
+    id_verifikasi INT AUTO_INCREMENT PRIMARY KEY,
+    id_user INT NOT NULL,
+    -- Kolom data diri & tanggal melebihi kamus SDD karena dituntut wireframe UI-008 (data diri + aturan ajukan ulang 14 hari)
+    jenis_fundraiser ENUM('Individu', 'Organisasi') NOT NULL,
+    nama_lengkap VARCHAR(150) NOT NULL,
+    nomor_identitas VARCHAR(50) NOT NULL,
+    nomor_telepon VARCHAR(20) NOT NULL,
+    dokumen_verifikasi VARCHAR(255) NOT NULL,
+    dokumen_pendukung VARCHAR(255) NULL,
+    status_dokumen ENUM('Menunggu', 'Valid', 'Ditolak') NOT NULL DEFAULT 'Menunggu',
+    alasan_penolakan TEXT NULL,
+    tanggal_pengajuan DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    tanggal_keputusan DATETIME NULL,
+    CONSTRAINT fk_verifikasi_pengguna
+        FOREIGN KEY (id_user) REFERENCES pengguna (id_user)
+        ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabel campaign
