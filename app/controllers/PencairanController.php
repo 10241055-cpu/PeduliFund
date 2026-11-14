@@ -435,6 +435,8 @@ class PencairanController
             exit('Tipe berkas tidak diizinkan untuk ditampilkan.');
         }
 
+        // Berkas LPJ/nota berisi data keuangan fundraiser: jangan disimpan peramban/proxy
+        header('Cache-Control: private, no-store');
         header('Content-Type: ' . $mime);
         header('Content-Length: ' . filesize($lokasiFile));
         header('Content-Disposition: inline; filename="' . $namaFile . '"');
