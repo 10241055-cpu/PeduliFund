@@ -274,6 +274,12 @@ body {
     color: var(--green-deep);
 }
 
+/* Pengisi otomatis akun data sampel di halaman masuk */
+.pf-akun-uji .btn-pf-outline {
+    padding: 6px 14px;
+    font-size: 11px;
+}
+
 .btn-pf-cta:focus-visible,
 .btn-pf-outline:focus-visible,
 .pf-menu-item:focus-visible {
