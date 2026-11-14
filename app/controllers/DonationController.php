@@ -168,11 +168,12 @@ class DonationController
     }
 
     /**
-     * Halaman landasan setelah aksi donasi mengikuti peran (dashboard_fundraiser dilindungi wajibLogin Fundraiser)
+     * Halaman landasan setelah aksi donasi mengikuti peran; tiap dashboard dilindungi wajibLogin perannya
+     * sendiri, jadi tujuan yang salah peran berakhir di pesan "tidak memiliki hak akses"
      */
     private function tujuanDashboard(): string
     {
-        return peranPenggunaAktif() === 'Fundraiser' ? 'dashboard_fundraiser.php' : 'dashboard_donatur.php';
+        return dashboardUntukPeran(peranPenggunaAktif());
     }
 }
 

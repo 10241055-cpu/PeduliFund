@@ -238,12 +238,20 @@ class CampaignEntity
     /**
      * Mengambil satu data campaign aktif untuk keperluan donasi publik (SDD SEQ-003)
      */
-    public function ambilCampaignAktifById(int $idCampaign): ?array
+    public function ambilCampaignAktifById(int $idCampaign, ?string $hariIni = null): ?array
     {
+        // Deadline ikut diperiksa: status baru jadi Selesai saat fundraiser membuka dashboard,
+        // jadi tanpa syarat ini donasi masih masuk ke campaign yang sudah kedaluwarsa
         $pernyataan = $this->pdo->prepare(
-            "SELECT * FROM campaign WHERE id_campaign = :id_campaign AND status_campaign = 'Aktif'"
+            "SELECT * FROM campaign
+             WHERE id_campaign = :id_campaign
+               AND status_campaign = 'Aktif'
+               AND deadline >= :hari_ini"
         );
-        $pernyataan->execute([':id_campaign' => $idCampaign]);
+        $pernyataan->execute([
+            ':id_campaign' => $idCampaign,
+            ':hari_ini'    => $hariIni ?? date('Y-m-d'),
+        ]);
         $campaign = $pernyataan->fetch();
 
         return $campaign !== false ? $campaign : null;

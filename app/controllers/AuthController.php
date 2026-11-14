@@ -168,13 +168,7 @@ class AuthController
      */
     private function alihkanSesuaiPeran(?string $role): void
     {
-        if ($role === 'Fundraiser') {
-            alihkan('dashboard_fundraiser.php');
-        } elseif ($role === 'Admin') {
-            alihkan('dashboard_admin.php');
-        } else {
-            alihkan('dashboard_donatur.php');
-        }
+        alihkan(dashboardUntukPeran($role));
     }
 
     /**
@@ -182,16 +176,14 @@ class AuthController
      */
     public function tampilkanPengajuanVerifikasi(): void
     {
-        wajibLogin();
+        // Halaman ini milik Donatur: setelah admin menyetujui, peran naik dan formulir tak relevan lagi
+        wajibLogin('Donatur');
 
         $judulHalaman = 'Verifikasi Akun Fundraiser';
         $pengajuan = $this->verifikasiEntity !== null
             ? $this->verifikasiEntity->ambilTerbaruByUser(idPenggunaAktif())
             : null;
-        // Aturan wireframe UI-008: setelah ditolak, pengajuan ulang baru boleh 14 hari kemudian
-        $bolehAjukan = $pengajuan === null
-            || $pengajuan['status_dokumen'] !== 'Ditolak'
-            || bolehAjukanUlang($pengajuan['tanggal_keputusan'], date('Y-m-d'));
+        $bolehAjukan = bolehAjukanVerifikasi($pengajuan, date('Y-m-d'));
         $old = $_SESSION['old'] ?? [];
         $errors = $_SESSION['errors'] ?? [];
         unset($_SESSION['old'], $_SESSION['errors']);
@@ -209,7 +201,7 @@ class AuthController
             alihkan('dashboard_donatur.php');
         }
 
-        wajibLogin();
+        wajibLogin('Donatur');
         verifikasiCsrf('ajukan_verifikasi.php');
 
         $idUser = idPenggunaAktif();
@@ -222,10 +214,10 @@ class AuthController
             alihkan('ajukan_verifikasi.php');
         }
 
-        if ($pengajuanLama !== null
-            && $pengajuanLama['status_dokumen'] === 'Ditolak'
-            && !bolehAjukanUlang($pengajuanLama['tanggal_keputusan'], date('Y-m-d'))) {
-            setPesan('info', 'Pengajuan ulang baru dapat dilakukan 14 hari setelah penolakan.');
+        if (!bolehAjukanVerifikasi($pengajuanLama, date('Y-m-d'))) {
+            setPesan('info', $pengajuanLama !== null && $pengajuanLama['status_dokumen'] === 'Valid'
+                ? 'Akun Anda sudah terverifikasi sebagai penggalang dana.'
+                : 'Pengajuan ulang baru dapat dilakukan 14 hari setelah penolakan.');
             alihkan('ajukan_verifikasi.php');
         }
 

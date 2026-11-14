@@ -58,6 +58,13 @@ $cek($nominalKecil < 10000, 'Nominal di bawah Rp 10.000 terdeteksi tidak valid')
 $cek(formatRupiah(50000) === 'Rp 50.000', 'formatRupiah(50000) menghasilkan "Rp 50.000"');
 $cek(formatRupiah(10000000) === 'Rp 10.000.000', 'formatRupiah(10000000) menghasilkan "Rp 10.000.000"');
 
+// 6. Tujuan setelah aksi donasi harus dashboard milik peran itu sendiri,
+//    karena tiap dashboard dijaga wajibLogin(peran) dan tujuan yang salah berakhir "tidak memiliki hak akses"
+$cek(dashboardUntukPeran('Admin') === 'dashboard_admin.php', 'Admin diarahkan ke dashboard admin setelah beraksi');
+$cek(dashboardUntukPeran('Fundraiser') === 'dashboard_fundraiser.php', 'Fundraiser diarahkan ke dashboard fundraiser setelah beraksi');
+$cek(dashboardUntukPeran('Donatur') === 'dashboard_donatur.php', 'Donatur diarahkan ke dashboard donatur setelah beraksi');
+$cek(dashboardUntukPeran(null) === 'dashboard_donatur.php', 'Peran kosong jatuh ke dashboard donatur (tidak fatal)');
+
 echo "--------------------------------------------------------" . PHP_EOL;
 echo $jumlahGagal === 0 ? 'Semua pengujian fitur donasi LULUS.' : $jumlahGagal . ' pengujian GAGAL.';
 echo PHP_EOL;
