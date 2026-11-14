@@ -331,7 +331,7 @@ class AuthController
     }
 
     /**
-     * Memproses verifikasi wajah (UI-007): unggah selfie lalu pencocokan simulasi
+     * Memproses verifikasi wajah (UI-007): simpan selfie hasil kamera peramban
      */
     public function prosesVerifikasiWajah(): void
     {
@@ -343,7 +343,6 @@ class AuthController
         verifikasiCsrf('verifikasi_wajah.php');
 
         $idUser = idPenggunaAktif();
-        $skenarioSimulasi = trim((string) ($_POST['simulasi_hasil'] ?? 'Berhasil'));
 
         $berkasWajah = $_FILES['foto_wajah'] ?? null;
         if (!isset($berkasWajah) || (int) ($berkasWajah['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
@@ -357,16 +356,11 @@ class AuthController
             alihkan('verifikasi_wajah.php');
         }
 
-        // Pencocokan wajah disimulasikan seperti payment gateway (SDD 1.3): sistem menilai selfie yang diunggah
-        if ($skenarioSimulasi === 'Berhasil') {
-            $this->modelPengguna->simpanFotoWajah($idUser, $hasilWajah['nama_file']);
-            setPesan('success', 'Verifikasi wajah berhasil. Selamat datang, penggalang dana!');
-            alihkan('dashboard_fundraiser.php');
-        }
-
-        // Gagal: foto tidak disimpan, verifikasi diulang di halaman ini (wireframe UI-007 poin 4)
-        UnggahBerkas::hapus(DIR_UPLOAD_VERIFIKASI, $hasilWajah['nama_file']);
-        $_SESSION['errors'] = ['Verifikasi wajah gagal, wajah tidak cocok. Silakan ambil foto kembali.'];
-        alihkan('verifikasi_wajah.php');
+        // PHP native tidak punya pencocokan wajah server-side; deteksi berjalan di peramban
+        // (FaceDetector). Selfie yang lolos validasi berkas dianggap lolos gerbang dan
+        // disimpan sebagai catatan admin (SDD 5.2.7).
+        $this->modelPengguna->simpanFotoWajah($idUser, $hasilWajah['nama_file']);
+        setPesan('success', 'Verifikasi wajah berhasil. Selamat datang, penggalang dana!');
+        alihkan('dashboard_fundraiser.php');
     }
 }
