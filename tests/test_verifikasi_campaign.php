@@ -101,6 +101,17 @@ $revisi = $campaignEntity->ambilByIdUntukAdmin($idCampaign2);
 $cek($revisi !== null && $revisi['status_campaign'] === 'Pending' && $revisi['judul'] === $judulRevisi, 'Revisi mengubah data dan mengembalikan status ke Pending');
 $cek($revisi !== null && $revisi['alasan_penolakan'] === null, 'Alasan penolakan dibersihkan setelah revisi');
 
+// 7b. Kirim ulang data yang identik: UPDATE tidak mengubah baris, tapi revisi tetap sah
+$cek($campaignEntity->perbaruiCampaignRevisi($idCampaign2, $idFundraiser, [
+    'judul'            => $judulRevisi,
+    'jenis'            => 'Bencana',
+    'deskripsi'        => 'Deskripsi sudah diperbaiki.',
+    'target_dana'      => 2500000.0,
+    'deadline'         => $revisi['deadline'],
+    'dokumen_campaign' => 'uji_dokumen_campaign2.pdf',
+    'gambar_campaign'  => null,
+]) === $idCampaign2, 'Revisi dengan data identik tetap dianggap berhasil');
+
 // 8. Revisi oleh akun lain ditolak sistem (proteksi pemilik)
 $emailLain = 'uji_campaign_lain_' . bin2hex(random_bytes(4)) . '@pedulifund.test';
 $idFundraiserLain = $modelPengguna->simpanAkunBaru($emailLain, 'rahasia123', 'Fundraiser');
