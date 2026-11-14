@@ -136,11 +136,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         detektor.detect(video).then(function (wajah) {
-            if (wajah.length > 0) {
+            if (wajah.length > 0 && !fotoSiap) {
                 aturStatus('Wajah terdeteksi.', 'text-success');
-                if (!fotoSiap) {
-                    ambilFoto(); // wajah muncul -> potret otomatis, Verifikasi tetap ditekan pengguna
-                }
+                ambilFoto(); // wajah muncul -> potret otomatis, Verifikasi tetap ditekan pengguna
             }
         }).catch(function () {
             // deteksi gagal sekali-sekali (frame hitam dsb.): abaikan, coba lagi di detak berikutnya
