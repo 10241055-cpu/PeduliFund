@@ -76,6 +76,20 @@ $idTanpaDonasi = (int) $pdo->lastInsertId();
 ujiDaftar('Campaign tanpa donasi tetap boleh dihapus', !$campaignEntity->punyaDonasiTercatat($idTanpaDonasi));
 $pdo->prepare('DELETE FROM campaign WHERE id_campaign = ?')->execute([$idTanpaDonasi]);
 
+// Tanggal donasi ditulis dari jam PHP (WIB), bukan NOW() MySQL yang berlabel zona berbeda:
+// donasi menjelang tengah malam harus tetap tercatat di hari yang sama
+$idDonasiUji = $donasiEntity->catatDonasi([
+    'id_campaign'       => 3,
+    'id_donatur'        => 3,
+    'nominal'           => 10000.0,
+    'metode_pembayaran' => 'QRIS',
+    'status_pembayaran' => 'Berhasil',
+]);
+$tanggalTercatat = (string) $pdo->query('SELECT tanggal_pembayaran FROM donasi WHERE id_donasi = ' . (int) $idDonasiUji)->fetchColumn();
+$pdo->prepare('DELETE FROM donasi WHERE id_donasi = ?')->execute([$idDonasiUji]);
+ujiDaftar('Tanggal donasi tercatat sesuai hari ini versi jam PHP (WIB)',
+    str_starts_with($tanggalTercatat, date('Y-m-d')));
+
 $terbaru = $donasiEntity->ambilDonaturTerbaruByCampaign(1);
 ujiDaftar('Donatur terbaru campaign 1 berjumlah 2 (donasi Gagal tidak ikut)', count($terbaru) === 2);
 ujiDaftar('Donatur terbaru tersortir terbaru dulu (QRIS 2.5 jt di posisi pertama)',
