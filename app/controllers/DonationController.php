@@ -107,9 +107,8 @@ class DonationController
             alihkan($this->tujuanDashboard());
         }
 
-        // Bersihkan pemisah ribuan jika ada
-        $nominalBersih = str_replace(['Rp', '.', ' ', ','], ['', '', '', '.'], $nominalRaw);
-        $nominal = is_numeric($nominalBersih) ? (float) $nominalBersih : 0.0;
+        // Normalisasi nominal lewat helper agar format desimal dan ribuan konsisten
+        $nominal = bersihkanNominal($nominalRaw);
 
         $errors = [];
         if ($nominal < DonasiEntity::NOMINAL_MINIMAL) {

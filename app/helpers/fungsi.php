@@ -19,6 +19,40 @@ function formatRupiah($angka): string
 }
 
 /**
+ * Normalisasi nominal uang dari input pengguna menjadi float (0.0 bila tidak valid).
+ * Koma dibaca sebagai desimal (format Indonesia); titik dibaca sebagai pemisah ribuan
+ * hanya bila berpola kelipatan 3 digit (50.000 / 1.500.000), selain itu titik adalah
+ * desimal karena input type="number" peramban mengirim "50000.5" untuk Rp 50.000,50.
+ */
+function bersihkanNominal(string $nominalRaw): float
+{
+    $nominalBersih = trim(str_replace(['Rp', ' '], '', $nominalRaw));
+
+    if (str_contains($nominalBersih, ',')) {
+        $nominalBersih = str_replace(',', '.', str_replace('.', '', $nominalBersih));
+    } elseif (preg_match('/^\d{1,3}(\.\d{3})+$/', $nominalBersih) === 1) {
+        $nominalBersih = str_replace('.', '', $nominalBersih);
+    }
+
+    return is_numeric($nominalBersih) ? (float) $nominalBersih : 0.0;
+}
+
+/**
+ * Samarkan email untuk tampilan publik agar data donatur tidak bisa dipanen bot:
+ * "donatur@pedulifund.test" -> "do•••@pedulifund.test"
+ */
+function samarkanEmail(string $email): string
+{
+    $bagian = explode('@', $email, 2);
+
+    if ($bagian[0] === '' || count($bagian) !== 2) {
+        return '•••';
+    }
+
+    return substr($bagian[0], 0, 2) . '•••@' . $bagian[1];
+}
+
+/**
  * Format tanggal ke format Indonesia singkat
  * Contoh: "2026-12-31" -> "31 Des 2026"
  */
@@ -201,6 +235,27 @@ function idPenggunaAktif(): int
 }
 
 /**
+ * Segarkan role sesi dari basis data: keputusan admin (mis. menyetujui verifikasi akun
+ * yang mengubah Donatur menjadi Fundraiser) berlaku pada permintaan berikutnya tanpa
+ * menunggu pengguna login ulang. Status Dibekukan tidak dipaksa logout di sini karena
+ * fundraiser yang dibekukan tetap harus bisa membuka halaman unggah LPJ.
+ */
+function segarkanRoleSesi(): void
+{
+    global $pdo;
+
+    if (!$pdo instanceof PDO || !sudahLogin()) {
+        return;
+    }
+
+    $pengguna = (new UserCredentialsDB($pdo))->ambilBerdasarkanId(idPenggunaAktif());
+
+    if ($pengguna !== null && ($pengguna['role'] ?? '') !== peranPenggunaAktif()) {
+        $_SESSION['pengguna_aktif']['role'] = $pengguna['role'];
+    }
+}
+
+/**
  * Batasi akses hanya untuk pengguna yang telah masuk (dan memiliki peran tertentu bila ditentukan)
  */
 function wajibLogin(?string $roleDibutuhkan = null): void
@@ -209,6 +264,9 @@ function wajibLogin(?string $roleDibutuhkan = null): void
         setPesan('danger', 'Silakan masuk terlebih dahulu untuk mengakses halaman tersebut.');
         alihkan('login.php');
     }
+
+    // Role disegarkan sebelum dicek agar perubahan role di DB tidak terasa basi
+    segarkanRoleSesi();
 
     if ($roleDibutuhkan !== null && peranPenggunaAktif() !== $roleDibutuhkan) {
         setPesan('danger', 'Anda tidak memiliki hak akses ke halaman tersebut.');

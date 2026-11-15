@@ -80,6 +80,10 @@ $terbaru = $donasiEntity->ambilDonaturTerbaruByCampaign(1);
 ujiDaftar('Donatur terbaru campaign 1 berjumlah 2 (donasi Gagal tidak ikut)', count($terbaru) === 2);
 ujiDaftar('Donatur terbaru tersortir terbaru dulu (QRIS 2.5 jt di posisi pertama)',
     (isset($terbaru[0]['nominal']) && (float) $terbaru[0]['nominal'] === 2500000.0));
+ujiDaftar('Email donatur tampil tersamarkan di daftar publik (do•••@pedulifund.test)',
+    ($terbaru[0]['email_donatur'] ?? '') === 'do•••@pedulifund.test');
+ujiDaftar('Tidak ada email utuh yang bocor di daftar donatur publik',
+    stripos(json_encode($terbaru), 'donatur@pedulifund.test') === false);
 
 echo "--------------------------------------------------------\n";
 echo $jumlahGagal === 0 ? "Semua pengujian campaign publik LULUS.\n" : "{$jumlahGagal} pengujian GAGAL.\n";

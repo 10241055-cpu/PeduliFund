@@ -18,6 +18,7 @@ class AuthController
     public function tampilkanLogin(): void
     {
         if (sudahLogin()) {
+            segarkanRoleSesi();
             $this->alihkanSesuaiPeran(peranPenggunaAktif());
         }
 
@@ -85,6 +86,7 @@ class AuthController
     public function tampilkanSignUp(): void
     {
         if (sudahLogin()) {
+            segarkanRoleSesi();
             $this->alihkanSesuaiPeran(peranPenggunaAktif());
         }
 
@@ -351,7 +353,12 @@ class AuthController
         // PHP native tidak punya pencocokan wajah server-side; deteksi berjalan di peramban
         // (FaceDetector). Selfie yang lolos validasi berkas dianggap lolos gerbang dan
         // disimpan sebagai catatan admin (SDD 5.2.7).
+        // Foto lama dibuang agar folder verifikasi tidak menumpuk selfie tiap verifikasi ulang
+        $fotoLama = $this->modelPengguna->ambilFotoWajah($idUser);
         $this->modelPengguna->simpanFotoWajah($idUser, $hasilWajah['nama_file']);
+        if ($fotoLama !== null) {
+            UnggahBerkas::hapus(DIR_UPLOAD_VERIFIKASI, $fotoLama);
+        }
         setPesan('success', 'Verifikasi wajah berhasil. Selamat datang, penggalang dana!');
         alihkan('dashboard_fundraiser.php');
     }

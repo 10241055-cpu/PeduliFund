@@ -79,6 +79,12 @@ class CampaignController
         if ($campaignEdit !== null && !in_array($campaignEdit['status_campaign'], ['Pending', 'Ditolak', 'Aktif'], true)) {
             $campaignEdit = null;
         }
+        // Campaign berjejak donasi/pencairan tidak boleh direvisi: status kembali Pending
+        // akan menariknya dari publik bersama dana yang sudah terkumpul
+        if ($campaignEdit !== null && $this->punyaJejakAudit($idEdit)) {
+            setPesan('danger', 'Campaign yang sudah punya jejak donasi atau pengajuan pencairan tidak dapat direvisi demi jejak audit.');
+            alihkan('dashboard_fundraiser.php');
+        }
         // Prefill dari data campaign bila pengguna datang tanpa sisa input lama
         if ($campaignEdit !== null && $old === []) {
             $old = [
@@ -114,6 +120,12 @@ class CampaignController
             : null;
         if ($idEdit > 0 && $campaignEdit === null) {
             setPesan('danger', 'Campaign tidak ditemukan atau bukan milik Anda.');
+            alihkan('dashboard_fundraiser.php');
+        }
+
+        // Sama seperti gerbang form: campaign berjejak donasi/pencairan menolak revisi
+        if ($idEdit > 0 && $this->punyaJejakAudit($idEdit)) {
+            setPesan('danger', 'Campaign yang sudah punya jejak donasi atau pengajuan pencairan tidak dapat direvisi demi jejak audit.');
             alihkan('dashboard_fundraiser.php');
         }
 
@@ -307,6 +319,11 @@ class CampaignController
             alihkan('dashboard_fundraiser.php');
         }
 
+        if ($this->pencairanEntity !== null && $this->pencairanEntity->punyaPengajuanMenunggu($idCampaign)) {
+            setPesan('danger', 'Campaign masih memiliki pengajuan pencairan yang menunggu keputusan admin dan tidak dapat dihapus.');
+            alihkan('dashboard_fundraiser.php');
+        }
+
         // donasi memakai ON DELETE CASCADE: tanpa gerbang ini seluruh riwayat donasi ikut terhapus
         if ($this->campaignEntity->punyaDonasiTercatat($idCampaign)) {
             setPesan('danger', 'Campaign yang sudah menerima donasi tidak dapat dihapus demi jejak audit donatur.');
@@ -328,6 +345,17 @@ class CampaignController
         }
 
         alihkan('dashboard_fundraiser.php');
+    }
+
+    /**
+     * Campaign dengan jejak donasi atau pengajuan pencairan tidak boleh direvisi:
+     * revisi mengembalikan status ke Pending sehingga campaign menarik diri dari
+     * publik bersama dana yang sudah terkumpul (keputusan produk audit tahap dua)
+     */
+    private function punyaJejakAudit(int $idCampaign): bool
+    {
+        return $this->campaignEntity->punyaDonasiTercatat($idCampaign)
+            || ($this->pencairanEntity !== null && $this->pencairanEntity->punyaPengajuanMenunggu($idCampaign));
     }
 
     /**
