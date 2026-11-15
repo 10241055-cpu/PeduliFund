@@ -48,9 +48,12 @@ class CampaignEntity
      */
     public function ambilDaftarByFundraiser(int $idFundraiser, string $cari = '', string $statusFilter = ''): array
     {
-        // jumlah_donasi dipakai view untuk menyembunyikan tombol Hapus pada campaign yang punya riwayat donasi
+        // jumlah_donasi & jumlah_pencairan_menunggu dipakai view untuk menyembunyikan tombol
+        // Hapus/Perbaiki pada campaign yang punya jejak donasi atau pengajuan pencairan
         $sql = 'SELECT c.*,
-                       (SELECT COUNT(*) FROM donasi d WHERE d.id_campaign = c.id_campaign) AS jumlah_donasi
+                       (SELECT COUNT(*) FROM donasi d WHERE d.id_campaign = c.id_campaign) AS jumlah_donasi,
+                       (SELECT COUNT(*) FROM pencairan_dana pd
+                         WHERE pd.id_campaign = c.id_campaign AND pd.status_pengajuan = \'Menunggu\') AS jumlah_pencairan_menunggu
                 FROM campaign c WHERE c.id_fundraiser = :id_fundraiser';
         $parameter = [':id_fundraiser' => $idFundraiser];
 

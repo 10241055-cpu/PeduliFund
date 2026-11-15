@@ -182,7 +182,7 @@ $bisaBuatCampaign = !$akunDibekukan && !$adaTagihanLpj;
                                             <?php if ($campaign['status_campaign'] === 'Aktif'): ?>
                                                 <a class="btn-pf-outline py-1 px-3" style="font-size: 11px;" href="<?= e(BASE_URL) ?>/donasi.php?id=<?= e((string) $campaign['id_campaign']) ?>">Donasi</a>
                                             <?php endif; ?>
-                                            <?php if ($campaign['status_campaign'] === 'Ditolak'): ?>
+                                            <?php if ($campaign['status_campaign'] === 'Ditolak' && (int) ($campaign['jumlah_donasi'] ?? 0) === 0 && (int) ($campaign['jumlah_pencairan_menunggu'] ?? 0) === 0): ?>
                                                 <a class="btn-pf-cta btn-pf-tabel" href="<?= e(BASE_URL) ?>/buat_campaign.php?id=<?= e((string) $idCampaign) ?>">Perbaiki</a>
                                             <?php endif; ?>
                                             <?php if ($layakCair): ?>
@@ -196,7 +196,7 @@ $bisaBuatCampaign = !$akunDibekukan && !$adaTagihanLpj;
                                                 </a>
                                             <?php endif; ?>
 
-                                            <?php if (!$sudahDisetujui && (int) ($campaign['jumlah_donasi'] ?? 0) === 0): ?>
+                                            <?php if (!$sudahDisetujui && (int) ($campaign['jumlah_donasi'] ?? 0) === 0 && (int) ($campaign['jumlah_pencairan_menunggu'] ?? 0) === 0): ?>
                                                 <form method="post" action="<?= e(BASE_URL) ?>/hapus_campaign.php" onsubmit="return confirm('Hapus campaign ini?');" class="m-0">
                                                     <input type="hidden" name="csrf_token" value="<?= e(tokenCsrf()) ?>">
                                                     <input type="hidden" name="id_campaign" value="<?= e((string) $idCampaign) ?>">
