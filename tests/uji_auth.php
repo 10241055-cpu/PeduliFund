@@ -66,6 +66,16 @@ $cek(sudahLogin(), 'sudahLogin() mengembalikan true setelah login');
 $cek(idPenggunaAktif() === $idBaru, 'idPenggunaAktif() mengembalikan id_user dari sesi aktif');
 $cek(peranPenggunaAktif() === 'Fundraiser', 'peranPenggunaAktif() mengembalikan role sesi');
 
+// 10. Roundtrip foto wajah (gerbang UI-007): simpan -> terbaca -> tidak butuh verifikasi lagi,
+//     lalu tertimpa saat verifikasi ulang (logika hapus berkas lamanya di sisi AuthController)
+$cek($model->ambilFotoWajah($idBaru) === null, 'Akun baru belum memiliki foto wajah');
+$cek($model->butuhVerifikasiWajah($idBaru), 'Akun tanpa foto wajah masih butuh verifikasi wajah');
+$cek($model->simpanFotoWajah($idBaru, 'uji_foto_wajah.jpg'), 'Simpan foto wajah berhasil');
+$cek($model->ambilFotoWajah($idBaru) === 'uji_foto_wajah.jpg', 'Foto wajah yang disimpan terbaca kembali');
+$cek(!$model->butuhVerifikasiWajah($idBaru), 'Akun yang sudah punya foto wajah tidak butuh verifikasi lagi');
+$cek($model->simpanFotoWajah($idBaru, 'uji_foto_wajah_baru.jpg'), 'Simpan foto wajah kedua berhasil menimpa');
+$cek($model->ambilFotoWajah($idBaru) === 'uji_foto_wajah_baru.jpg', 'Foto wajah baru menggantikan yang lama di database');
+
 // Bersihkan data uji dari database dan sesi
 $pdo->prepare("DELETE FROM pengguna WHERE id_user = :id")->execute([':id' => $idBaru]);
 unset($_SESSION['pengguna_aktif']);

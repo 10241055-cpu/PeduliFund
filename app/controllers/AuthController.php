@@ -158,6 +158,13 @@ class AuthController
      */
     public function prosesLogout(): void
     {
+        // Logout hanya lewat POST bertoken: link/img GET dari halaman lain tidak boleh bisa me-logout orang
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            alihkan(dashboardUntukPeran(peranPenggunaAktif()));
+        }
+
+        verifikasiCsrf(dashboardUntukPeran(peranPenggunaAktif()));
+
         unset($_SESSION['pengguna_aktif']);
         session_regenerate_id(true);
 
