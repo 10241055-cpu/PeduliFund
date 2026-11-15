@@ -43,23 +43,6 @@ class DonasiEntity
     }
 
     /**
-     * Mengambil satu data transaksi donasi berdasarkan ID
-     */
-    public function ambilByIdDonasi(int $idDonasi): ?array
-    {
-        $sql = "SELECT d.*, c.judul AS judul_campaign
-                FROM donasi d
-                JOIN campaign c ON d.id_campaign = c.id_campaign
-                WHERE d.id_donasi = :id_donasi";
-
-        $pernyataan = $this->pdo->prepare($sql);
-        $pernyataan->execute([':id_donasi' => $idDonasi]);
-        $donasi = $pernyataan->fetch();
-
-        return $donasi !== false ? $donasi : null;
-    }
-
-    /**
      * Mengambil riwayat donasi pengguna tertentu (untuk UI-004 Dashboard Donatur)
      */
     public function ambilRiwayatByDonatur(int $idDonatur): array

@@ -3,9 +3,6 @@
 
 class PencairanEntity
 {
-    public const DAFTAR_STATUS_PENGAJUAN = ['Menunggu', 'Disetujui', 'Ditolak'];
-    public const DAFTAR_STATUS_TRANSPARANSI = ['Menunggu', 'Terverifikasi', 'Ditolak'];
-
     private PDO $pdo;
 
     public function __construct(PDO $pdo)
