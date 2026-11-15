@@ -18,6 +18,7 @@ class AuthController
     public function tampilkanLogin(): void
     {
         if (sudahLogin()) {
+            segarkanRoleSesi();
             $this->alihkanSesuaiPeran(peranPenggunaAktif());
         }
 
@@ -85,6 +86,7 @@ class AuthController
     public function tampilkanSignUp(): void
     {
         if (sudahLogin()) {
+            segarkanRoleSesi();
             $this->alihkanSesuaiPeran(peranPenggunaAktif());
         }
 
