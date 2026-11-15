@@ -91,6 +91,23 @@ class PencairanEntity
     }
 
     /**
+     * Memeriksa apakah campaign masih punya pengajuan pencairan yang menunggu keputusan admin;
+     * dipakai gerbang hapus/revisi campaign agar antrean audit tidak ikut terhapus
+     */
+    public function punyaPengajuanMenunggu(int $idCampaign): bool
+    {
+        $sql = "SELECT COUNT(*)
+                FROM pencairan_dana
+                WHERE id_campaign = :id_campaign
+                  AND status_pengajuan = 'Menunggu'";
+
+        $pernyataan = $this->pdo->prepare($sql);
+        $pernyataan->execute([':id_campaign' => $idCampaign]);
+
+        return ((int) $pernyataan->fetchColumn()) > 0;
+    }
+
+    /**
      * Mengambil pengajuan pencairan terakhir yang ditolak pada campaign tertentu
      */
     public function ambilPenolakanTerakhir(int $idCampaign): ?array
@@ -291,7 +308,9 @@ class PencairanEntity
     }
 
     /**
-     * Mengambil daftar pencairan yang melewati batas unggah LPJ tanpa status Terverifikasi
+     * Mengambil daftar pencairan yang melewati batas unggah LPJ tanpa status Terverifikasi.
+     * LPJ yang sudah diunggah (dokumen_lpj terisi) tidak dihitung terlambat meski belum
+     * diaudit admin — fundraiser tidak boleh dihukum karena antrean audit admin.
      */
     public function ambilPencairanMelewatiBatasLpj(string $hariIni): array
     {
@@ -302,6 +321,7 @@ class PencairanEntity
                 INNER JOIN pengguna u ON u.id_user = c.id_fundraiser
                 WHERE p.status_pengajuan = 'Disetujui'
                   AND p.status_transparansi <> 'Terverifikasi'
+                  AND p.dokumen_lpj IS NULL
                   AND p.batas_unggah_lpj IS NOT NULL
                   AND p.batas_unggah_lpj < :hari_ini";
 

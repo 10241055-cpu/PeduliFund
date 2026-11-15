@@ -163,6 +163,27 @@ $controller->periksaDanTerapkanSanksiLpj('2027-01-06');
 $akun = $userModel->ambilBerdasarkanId($idFundraiser);
 $cek(($akun['status_akun'] ?? '') === 'Aktif' && $akun['suspend_sampai'] === null, 'Akun aktif kembali setelah masa suspend selesai dan LPJ terverifikasi');
 
+// 6. Campaign dengan pengajuan Menunggu terdeteksi (gerbang hapus/revisi campaign)
+$cek(!$pencairanEntity->punyaPengajuanMenunggu(1), 'Campaign tanpa pengajuan Menunggu tidak terdeteksi');
+$cek(!$pencairanEntity->punyaPengajuanMenunggu(2), 'Campaign dengan pengajuan Disetujui tidak terdeteksi sebagai Menunggu');
+
+// 7. LPJ yang sudah diunggah namun belum diaudit admin tidak boleh memicu sanksi suspend:
+//    antrean audit yang lambat bukan kesalahan fundraiser
+$idCair4 = $pencairanEntity->simpanPengajuan([
+    'id_campaign'       => 3,
+    'nominal_pencairan' => 1000000.0,
+    'nama_bank'         => 'Bank BNI',
+    'nomor_rekening'    => '5566778899',
+    'atas_nama'         => 'Yayasan Peduli',
+]);
+$cek($pencairanEntity->punyaPengajuanMenunggu(3), 'Campaign dengan pengajuan Menunggu terdeteksi');
+$pencairanEntity->prosesKeputusanPencairan($idCair4, true, null, '2027-01-07 10:00:00', '2027-02-01');
+$pencairanEntity->simpanLpj($idCair4, 'lpj_4.pdf', 'nota_4.jpg', '2027-02-05 10:00:00');
+$cek($controller->periksaDanTerapkanSanksiLpj('2027-02-10') === 0, 'LPJ sudah diunggah namun belum diaudit admin tidak membekukan akun');
+$akun = $userModel->ambilBerdasarkanId($idFundraiser);
+$cek(($akun['status_akun'] ?? '') === 'Aktif', 'Akun tetap aktif saat LPJ menunggu audit admin');
+$cek(!$pencairanEntity->punyaPengajuanMenunggu(3), 'Setelah keputusan admin, campaign bebas dari pengajuan Menunggu');
+
 echo $jumlahGagal === 0 ? 'Semua pengujian pencairan dana lulus.' . PHP_EOL : $jumlahGagal . ' pengujian gagal.' . PHP_EOL;
 
 exit($jumlahGagal > 0 ? 1 : 0);
