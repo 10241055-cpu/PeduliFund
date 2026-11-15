@@ -94,7 +94,9 @@ class DonationController
             alihkan($this->tujuanDashboard());
         }
 
-        verifikasiCsrf();
+        // Gagal CSRF kembali ke form donasi, bukan dashboard fundraiser: pesan "sesi tidak valid"
+        // yang relevan ikut terbaca, bukan pesan "tidak memiliki hak akses"
+        verifikasiCsrf('donasi.php');
 
         $idCampaign = (int) ($_POST['id_campaign'] ?? 0);
         $nominalRaw = trim((string) ($_POST['nominal'] ?? ''));

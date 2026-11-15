@@ -27,7 +27,7 @@ class DonasiEntity
         $sql = "INSERT INTO donasi (
                     id_campaign, id_donatur, nominal, metode_pembayaran, status_pembayaran, tanggal_pembayaran
                 ) VALUES (
-                    :id_campaign, :id_donatur, :nominal, :metode_pembayaran, :status_pembayaran, NOW()
+                    :id_campaign, :id_donatur, :nominal, :metode_pembayaran, :status_pembayaran, :tanggal_pembayaran
                 )";
 
         $pernyataan = $this->pdo->prepare($sql);
@@ -37,6 +37,9 @@ class DonasiEntity
             ':nominal'           => (float) $data['nominal'],
             ':metode_pembayaran' => (string) $data['metode_pembayaran'],
             ':status_pembayaran' => (string) $data['status_pembayaran'],
+            // Jam PHP (WIB) dipakai alih-alih NOW() MySQL: label zona jam server tidak
+            // selalu WIB, donasi menjelang tengah malam bisa tercatat besoknya
+            ':tanggal_pembayaran' => date('Y-m-d H:i:s'),
         ]);
 
         return (int) $this->pdo->lastInsertId();
