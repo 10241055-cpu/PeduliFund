@@ -267,7 +267,7 @@ class CampaignEntity
      * Daftar campaign untuk halaman publik UI-005: hanya berstatus Aktif dan belum melewati deadline,
      * dengan pencarian judul serta filter jenis (SDD 5.2.5)
      */
-    public function ambilCampaignPublik(string $cari = '', string $jenis = '', string $hariIni = null): array
+    public function ambilCampaignPublik(string $cari = '', string $jenis = '', ?string $hariIni = null): array
     {
         $sql = "SELECT * FROM campaign
                 WHERE status_campaign = 'Aktif'
