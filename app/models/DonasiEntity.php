@@ -76,8 +76,9 @@ class DonasiEntity
         $pernyataan->bindValue(':limit', $limit, PDO::PARAM_INT);
         $pernyataan->execute();
 
-        // Email disamarkan di luar SQL agar tidak bergantung dialek MySQL/SQLite
-        $donatur = $pernyataan->fetchAll();
+        // FETCH_ASSOC memastikan tidak ada alias numerik yang menyalin email mentah;
+        // email disamarkan di luar SQL agar tidak bergantung dialek MySQL/SQLite
+        $donatur = $pernyataan->fetchAll(PDO::FETCH_ASSOC);
         foreach ($donatur as &$baris) {
             $baris['email_donatur'] = samarkanEmail((string) $baris['email_donatur']);
         }
