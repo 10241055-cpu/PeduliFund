@@ -155,9 +155,9 @@ class UserCredentialsDB
     }
 
     /**
-     * Memeriksa apakah fundraiser masih perlu melewati gerbang verifikasi wajah (UI-007)
+     * Mengambil nama berkas foto wajah milik pengguna (null bila belum pernah verifikasi)
      */
-    public function butuhVerifikasiWajah(int $idUser): bool
+    public function ambilFotoWajah(int $idUser): ?string
     {
         $pernyataan = $this->pdo->prepare(
             'SELECT foto_wajah FROM pengguna WHERE id_user = :id_user LIMIT 1'
@@ -165,6 +165,14 @@ class UserCredentialsDB
         $pernyataan->execute([':id_user' => $idUser]);
         $fotoWajah = $pernyataan->fetchColumn();
 
-        return $fotoWajah === false || $fotoWajah === null || trim((string) $fotoWajah) === '';
+        return is_string($fotoWajah) && trim($fotoWajah) !== '' ? $fotoWajah : null;
+    }
+
+    /**
+     * Memeriksa apakah fundraiser masih perlu melewati gerbang verifikasi wajah (UI-007)
+     */
+    public function butuhVerifikasiWajah(int $idUser): bool
+    {
+        return $this->ambilFotoWajah($idUser) === null;
     }
 }
