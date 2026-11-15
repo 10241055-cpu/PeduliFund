@@ -348,14 +348,15 @@ class CampaignController
     }
 
     /**
-     * Campaign dengan jejak donasi atau pengajuan pencairan tidak boleh direvisi:
-     * revisi mengembalikan status ke Pending sehingga campaign menarik diri dari
-     * publik bersama dana yang sudah terkumpul (keputusan produk audit tahap dua)
+     * Campaign dengan jejak donasi, pengajuan pencairan, atau dana yang sudah dicairkan
+     * tidak boleh direvisi: revisi mengembalikan status ke Pending sehingga campaign
+     * menarik diri dari publik bersama dana yang sudah terkumpul (keputusan produk audit)
      */
     private function punyaJejakAudit(int $idCampaign): bool
     {
         return $this->campaignEntity->punyaDonasiTercatat($idCampaign)
-            || ($this->pencairanEntity !== null && $this->pencairanEntity->punyaPengajuanMenunggu($idCampaign));
+            || ($this->pencairanEntity !== null && $this->pencairanEntity->punyaPengajuanMenunggu($idCampaign))
+            || ($this->pencairanEntity !== null && $this->pencairanEntity->sudahDicairkan($idCampaign));
     }
 
     /**
