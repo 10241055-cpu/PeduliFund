@@ -42,10 +42,10 @@ class VerifikasiFundraiserEntity
     {
         $sql = 'INSERT INTO verifikasi_fundraiser
                     (id_user, jenis_fundraiser, nama_lengkap, nomor_identitas, nomor_telepon,
-                     dokumen_verifikasi, dokumen_pendukung)
+                     dokumen_verifikasi, dokumen_pendukung, tanggal_pengajuan)
                 VALUES
                     (:id_user, :jenis_fundraiser, :nama_lengkap, :nomor_identitas, :nomor_telepon,
-                     :dokumen_verifikasi, :dokumen_pendukung)';
+                     :dokumen_verifikasi, :dokumen_pendukung, :tanggal_pengajuan)';
 
         $pernyataan = $this->pdo->prepare($sql);
         $pernyataan->execute([
@@ -56,6 +56,9 @@ class VerifikasiFundraiserEntity
             ':nomor_telepon'      => $data['nomor_telepon'],
             ':dokumen_verifikasi' => $data['dokumen_verifikasi'],
             ':dokumen_pendukung'  => $data['dokumen_pendukung'],
+            // Jam PHP (WIB) dipakai alih-alih default CURRENT_TIMESTAMP MySQL: label zona
+            // jam server tidak selalu WIB, aturan ajukan-ulang 14 hari membandingkan tanggal ini
+            ':tanggal_pengajuan'  => date('Y-m-d H:i:s'),
         ]);
 
         return (int) $this->pdo->lastInsertId();
@@ -101,10 +104,14 @@ class VerifikasiFundraiserEntity
     {
         $pernyataan = $this->pdo->prepare(
             "UPDATE verifikasi_fundraiser
-             SET status_dokumen = 'Valid', alasan_penolakan = NULL, tanggal_keputusan = NOW()
+             SET status_dokumen = 'Valid', alasan_penolakan = NULL, tanggal_keputusan = :tanggal_keputusan
              WHERE id_verifikasi = :id_verifikasi AND status_dokumen = 'Menunggu'"
         );
-        $pernyataan->execute([':id_verifikasi' => $idVerifikasi]);
+        // Keputusan dicatat dari jam PHP (WIB), konsisten dengan "hari ini" yang dibaca PHP
+        $pernyataan->execute([
+            ':id_verifikasi'      => $idVerifikasi,
+            ':tanggal_keputusan'  => date('Y-m-d H:i:s'),
+        ]);
 
         // execute() saja tidak cukup: transisi hanya sah bila benar-benar ada baris yang berpindah status
         return $pernyataan->rowCount() > 0;
@@ -121,12 +128,14 @@ class VerifikasiFundraiserEntity
 
         $pernyataan = $this->pdo->prepare(
             "UPDATE verifikasi_fundraiser
-             SET status_dokumen = 'Ditolak', alasan_penolakan = :alasan, tanggal_keputusan = NOW()
+             SET status_dokumen = 'Ditolak', alasan_penolakan = :alasan, tanggal_keputusan = :tanggal_keputusan
              WHERE id_verifikasi = :id_verifikasi AND status_dokumen = 'Menunggu'"
         );
+        // Keputusan dicatat dari jam PHP (WIB), konsisten dengan "hari ini" yang dibaca PHP
         $pernyataan->execute([
-            ':alasan'       => trim($alasan),
-            ':id_verifikasi' => $idVerifikasi,
+            ':alasan'             => trim($alasan),
+            ':id_verifikasi'      => $idVerifikasi,
+            ':tanggal_keputusan'  => date('Y-m-d H:i:s'),
         ]);
 
         return $pernyataan->rowCount() > 0;

@@ -56,7 +56,10 @@ $pesan = ambilPesan();
                         <?= e(penggunaAktif()['email'] ?? '') ?>
                     </span>
                 </div>
-                <a class="btn-pf-outline py-1 px-3 fs-6" href="<?= e(BASE_URL) ?>/logout.php">Keluar</a>
+                <form method="post" action="<?= e(BASE_URL) ?>/logout.php" class="m-0">
+                    <input type="hidden" name="csrf_token" value="<?= e(tokenCsrf()) ?>">
+                    <button type="submit" class="btn-pf-outline py-1 px-3 fs-6">Keluar</button>
+                </form>
             <?php else: ?>
                 <a class="btn-pf-cta py-1 px-3 fs-6" href="<?= e(BASE_URL) ?>/login.php">Masuk</a>
             <?php endif; ?>
