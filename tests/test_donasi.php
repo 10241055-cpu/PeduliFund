@@ -40,17 +40,18 @@ $cek($persenCapai === 100, 'Kalkulasi progres melebihi target dipatok maksimal 1
 $persenNol = hitungPersen(50000, 0);
 $cek($persenNol === 0, 'Kalkulasi jika target nol menghasilkan 0% tanpa division by zero');
 
-// 3. Verifikasi Logika Pembersihan Nominal Uang
-$nominalInput1 = '50.000';
-$nominalBersih1 = (float) str_replace(['Rp', '.', ' ', ','], ['', '', '', '.'], $nominalInput1);
-$cek($nominalBersih1 === 50000.0, 'Pembersihan format nominal dengan titik pemisah ribuan berhasil');
-
-$nominalInput2 = 'Rp 100.000';
-$nominalBersih2 = (float) str_replace(['Rp', '.', ' ', ','], ['', '', '', '.'], $nominalInput2);
-$cek($nominalBersih2 === 100000.0, 'Pembersihan nominal dengan awalan "Rp " berhasil');
+// 3. Verifikasi Logika Pembersihan Nominal Uang (helper bersihkanNominal)
+$cek(bersihkanNominal('50.000') === 50000.0, 'Pembersihan format nominal dengan titik pemisah ribuan berhasil');
+$cek(bersihkanNominal('Rp 100.000') === 100000.0, 'Pembersihan nominal dengan awalan "Rp " berhasil');
+$cek(bersihkanNominal('1.500.000,00') === 1500000.0, 'Format Indonesia lengkap (titik ribuan + koma desimal) dibaca benar');
+// Input type="number" peramban mengirim "50000.5" untuk Rp 50.000,50; parser lama menjadikannya 500005
+$cek(bersihkanNominal('50000.5') === 50000.5, 'Desimal bentukan input number tidak lagi dilipatgandakan 10x');
+$cek(bersihkanNominal('10000,50') === 10000.5, 'Koma dibaca sebagai desimal (format Indonesia)');
+$cek(bersihkanNominal('50000') === 50000.0, 'Angka polos dibaca apa adanya');
+$cek(bersihkanNominal('abc') === 0.0, 'Input bukan angka jatuh ke 0.0 lalu ditolak validasi minimal');
 
 // 4. Verifikasi Aturan Batas Minimal Donasi
-$cek($nominalBersih1 >= 10000, 'Nominal donasi Rp 50.000 di atas batas minimal Rp 10.000');
+$cek(bersihkanNominal('50.000') >= 10000, 'Nominal donasi Rp 50.000 di atas batas minimal Rp 10.000');
 $nominalKecil = 5000.0;
 $cek($nominalKecil < 10000, 'Nominal di bawah Rp 10.000 terdeteksi tidak valid');
 

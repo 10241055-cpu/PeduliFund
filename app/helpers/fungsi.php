@@ -19,6 +19,25 @@ function formatRupiah($angka): string
 }
 
 /**
+ * Normalisasi nominal uang dari input pengguna menjadi float (0.0 bila tidak valid).
+ * Koma dibaca sebagai desimal (format Indonesia); titik dibaca sebagai pemisah ribuan
+ * hanya bila berpola kelipatan 3 digit (50.000 / 1.500.000), selain itu titik adalah
+ * desimal karena input type="number" peramban mengirim "50000.5" untuk Rp 50.000,50.
+ */
+function bersihkanNominal(string $nominalRaw): float
+{
+    $nominalBersih = trim(str_replace(['Rp', ' '], '', $nominalRaw));
+
+    if (str_contains($nominalBersih, ',')) {
+        $nominalBersih = str_replace(',', '.', str_replace('.', '', $nominalBersih));
+    } elseif (preg_match('/^\d{1,3}(\.\d{3})+$/', $nominalBersih) === 1) {
+        $nominalBersih = str_replace('.', '', $nominalBersih);
+    }
+
+    return is_numeric($nominalBersih) ? (float) $nominalBersih : 0.0;
+}
+
+/**
  * Format tanggal ke format Indonesia singkat
  * Contoh: "2026-12-31" -> "31 Des 2026"
  */
